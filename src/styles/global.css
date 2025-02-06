@@ -1,0 +1,418 @@
+@import './components/processing-display.css';
+@import './components/edit-metadata-modal.css';
+@import './components/loaders.css';
+@import './components/view-metadata-modal.css';
+@import './components/config-modal.css';
+@import './components/processing-queue.css';
+@import './components/tag-combobox.css';
+@tailwind base;
+
+@layer base {
+  :root {
+    --dialog-width: calc(min(auto, 100%));
+    --dialog-height: calc(min(auto, 100%));
+  }
+
+  .settings-display {
+    padding: 1rem;
+    width: 100%;
+    max-width: 500px;
+  }
+
+  .setting-item {
+    display: flex;
+    justify-content: space-between;
+    padding: 0.5rem 0;
+    border-bottom: 1px solid var(--background-modifier-border);
+  }
+
+  .setting-item:last-child {
+    border-bottom: none;
+  }
+
+  .setting-label {
+    font-weight: bold;
+    color: var(--text-muted);
+  }
+
+  .setting-value {
+    color: var(--text-normal);
+  }
+
+  .button-group {
+    margin-top: 1rem;
+  }
+
+  .model-item {
+    border-radius: 0.5rem;
+    cursor: pointer;
+    padding: 0.5rem;
+    border-bottom: 1px solid var(--background-modifier-border);
+  }
+
+  .model-item:hover {
+    background-color: var(--background-modifier-border);
+  }
+
+  .model-item:last-child {
+    border-bottom: none;
+  }
+
+  .queue-indicator {
+    cursor: pointer;
+    opacity: 0.8;
+    transition: opacity 0.2s ease;
+  }
+
+  .queue-indicator:hover {
+    opacity: 1;
+  }
+
+  .rotating {
+    animation: spin 2s linear infinite;
+  }
+
+  @keyframes spin {
+    100% {
+      transform: rotate(360deg);
+    }
+  }
+
+  .vision-recall-status-bar-control {
+    cursor: pointer;
+    opacity: 0.8;
+    transition: opacity 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 4px;
+  }
+
+  .vision-recall-status-bar-control:hover {
+    opacity: 1;
+  }
+
+  .edge-tts-status-bar-control:hover {
+    color: var(--interactive-accent);
+  }
+
+  .loader {
+    border: 4px solid rgba(0, 0, 0, 0.1);
+    border-left-color: #000;
+    border-radius: 50%;
+    width: 20px;
+    height: 20px;
+    animation: spin 1s linear infinite;
+  }
+
+  .file-upload-modal {
+    z-index: 1;
+  }
+
+  .file-upload-container {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    margin-top: 20px;
+  }
+
+  .clipboard-upload-button-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    margin-top: 40px;
+  }
+
+  .settings-header {
+    margin-top: 40px;
+  }
+
+  .vision-recall-view {
+    padding-right: 20px;
+    padding-left: 20px;
+  }
+
+  .vision-recall-view a,
+  .link {
+    color: var(--text-accent);
+    text-decoration: underline;
+    cursor: pointer;
+  }
+
+  .vision-recall-view a:hover,
+  .link:hover {
+    color: var(--text-accent-hover);
+  }
+
+  .vision-recall-view h2 {
+    /* margin-bottom: 20px; */
+  }
+
+  .vision-recall-view ul {
+    list-style-type: none;
+    padding: 0;
+  }
+
+  .vision-recall-view li {
+    /* margin-bottom: 20px; */
+  }
+
+  .vision-recall-view .view-filters {
+    margin-bottom: 10px;
+  }
+
+  .vision-recall-view .view-filters input[type='text'] {
+    width: 100%;
+    padding: 8px;
+    border: 1px solid var(--background-modifier-border); /* Use Obsidian theme variable for border */
+    border-radius: 5px;
+    background-color: var(
+      --background-primary
+    ); /* Use Obsidian theme variable for background */
+    color: var(--text-normal); /* Use Obsidian theme variable for text color */
+    /* margin-bottom: 5px; Add some margin between input fields */
+  }
+
+  .vision-recall-view .metadata-list {
+    display: flex; /* Use flexbox for list layout */
+    flex-direction: column; /* Stack list items vertically */
+    border: 1px solid var(--background-modifier-border);
+    border-radius: 5px;
+    overflow: hidden; /* Clip any content that overflows rounded corners */
+  }
+
+  .vision-recall-view .metadata-list .list-header {
+    display: flex; /* Flexbox for header items */
+    background-color: var(
+      --background-modifier-hover
+    ); /* Header background color */
+    padding: 8px 10px;
+    font-weight: bold;
+    border-bottom: 1px solid var(--background-modifier-border);
+  }
+
+  .vision-recall-view .metadata-list .list-header strong {
+    flex: 1; /* Distribute space evenly among header items */
+    text-align: left; /* Align header text to the left */
+    padding-right: 10px; /* Add some spacing between header items */
+    white-space: nowrap;
+  }
+
+  .vision-recall-view .metadata-list .list-item {
+    display: flex; /* Flexbox for list items */
+    padding: 10px 10px;
+    border-bottom: 1px solid var(--background-modifier-border); /* Separator between items */
+  }
+
+  .vision-recall-view .metadata-list .list-item:last-child {
+    border-bottom: none; /* Remove border from the last item */
+  }
+
+  .vision-recall-view .metadata-list .list-item span {
+    flex: 1; /* Distribute space evenly among item spans */
+    text-align: left; /* Align text to the left */
+    padding-right: 10px; /* Spacing between spans in items */
+    overflow: hidden; /* Ensure text ellipsis works */
+    text-overflow: ellipsis; /* Ellipsis for overflowing text */
+    white-space: nowrap; /* Prevent text wrapping */
+    padding-bottom: 10px;
+  }
+
+  /* Adjust width for specific columns if needed */
+  .vision-recall-view .metadata-list .list-header strong:nth-child(1), /* Screenshot Filename */
+.vision-recall-view .metadata-list .list-item span:nth-child(1) {
+    flex: 1;
+  }
+  .vision-recall-view .metadata-list .list-header strong:nth-child(2), /* Note Path */
+.vision-recall-view .metadata-list .list-item span:nth-child(2) {
+    flex: 1;
+  }
+  .vision-recall-view .metadata-list .list-header strong:nth-child(3), /* Timestamp */
+.vision-recall-view .metadata-list .list-item span:nth-child(3) {
+    flex: 1.5;
+  }
+  .vision-recall-view .metadata-list .list-header strong:nth-child(4), /* Extracted Tags */
+.vision-recall-view .metadata-list .list-item span:nth-child(4) {
+    flex: 2;
+  }
+  .vision-recall-view .metadata-list .list-header strong:nth-child(5), /* Actions */
+.vision-recall-view .metadata-list .list-item span:nth-child(5) {
+    flex: 1;
+    justify-content: end;
+    flex-direction: row;
+    align-items: end;
+    text-align: right;
+    min-width: fit-content;
+    width: fit-content;
+    padding-right: 0px;
+  }
+
+  .vision-recall-view .view-filters label {
+    margin-right: 5px;
+  }
+
+  .vision-recall-view .view-filters input[type='date'] {
+    padding: 8px;
+    border: 1px solid var(--background-modifier-border);
+    border-radius: 5px;
+    background-color: var(--background-primary);
+    color: var(--text-normal);
+    /* margin-bottom: 5px; */
+  }
+}
+
+@tailwind components;
+@tailwind utilities;
+
+/* Add these styles to your existing CSS */
+.pagination-controls {
+  padding: 8px;
+  border-top: 1px solid var(--background-modifier-border);
+}
+
+.pagination-controls button {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 8px;
+  border: 1px solid var(--background-modifier-border);
+  border-radius: 4px;
+  background-color: var(--background-primary);
+}
+
+.pagination-controls button:hover:not(:disabled) {
+  background-color: var(--background-modifier-hover);
+}
+
+.pagination-controls .items-per-page-select {
+  padding: 4px 8px;
+  border: 1px solid var(--background-modifier-border);
+  border-radius: 4px;
+  background-color: var(--background-primary);
+}
+
+.pagination-info {
+  padding: 0 8px;
+}
+
+.gallery-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  gap: 1rem;
+  padding: 1rem;
+}
+
+.gallery-item {
+  background: var(--background-secondary);
+  border-radius: 8px;
+  overflow: hidden;
+  transition: transform 0.2s;
+}
+
+.gallery-item:hover {
+  transform: translateY(-2px);
+}
+
+.gallery-image-container {
+  position: relative;
+  aspect-ratio: 16/9;
+  overflow: hidden;
+}
+
+.gallery-image-container img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  cursor: pointer;
+}
+
+.gallery-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  opacity: 0;
+  transition: opacity 0.2s;
+  pointer-events: none;
+}
+
+.gallery-image-container:hover .gallery-overlay {
+  opacity: 1;
+}
+
+.gallery-button {
+  background: var(--interactive-accent);
+  color: var(--text-on-accent);
+  padding: 0.5rem 1rem;
+  border-radius: 4px;
+  border: none;
+  cursor: pointer;
+  margin-bottom: 0.5rem;
+}
+
+.gallery-actions {
+  display: flex;
+  gap: 1rem;
+  color: white;
+}
+
+.gallery-info {
+  padding: 0.75rem;
+}
+
+.gallery-filename {
+  font-weight: bold;
+  margin-bottom: 0.25rem;
+}
+
+.gallery-date {
+  color: var(--text-muted);
+  font-size: 0.9em;
+  margin-bottom: 0.25rem;
+}
+
+.gallery-tags {
+  color: var(--text-muted);
+  font-size: 0.9em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.vision-recall-status-bar-controls {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+/* Screenshot Modal Styles */
+.screenshot-modal-content {
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+.screenshot-modal-link {
+  display: block;
+  margin: auto;
+  cursor: pointer;
+}
+
+.screenshot-modal-image {
+  display: block;
+  margin: auto;
+  max-width: 100%;
+  max-height: 80vh;
+  height: auto;
+  width: auto;
+}

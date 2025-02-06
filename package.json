@@ -1,0 +1,57 @@
+{
+	"name": "obsidian-vision-recall",
+	"version": "1.0.0",
+	"description": "Transform screenshots into searchable Obsidian notes using AI vision and text analysis.",
+	"main": "main.js",
+	"scripts": {
+		"dev": "vite build --mode development --watch",
+		"build": "tsc -noEmit -skipLibCheck && vite build --mode production",
+		"version": "node version-bump.mjs && git add manifest.json versions.json"
+	},
+	"keywords": [],
+	"author": "Travis Van Nimwegen",
+	"license": "AGPL-3.0",
+	"devDependencies": {
+		"@tailwindcss/container-queries": "^0.1.1",
+		"@types/events": "^3.0.3",
+		"@types/luxon": "^3.4.2",
+		"@types/node": "^20.17.16",
+		"@types/react": "^18.3.18",
+		"@types/react-dom": "^18.3.5",
+		"@types/tesseract.js": "^0.0.2",
+		"@typescript-eslint/eslint-plugin": "5.29.0",
+		"@typescript-eslint/parser": "5.29.0",
+		"@vitejs/plugin-react": "^4.3.4",
+		"autoprefixer": "^10.4.20",
+		"builtin-modules": "3.3.0",
+		"esbuild": "0.17.3",
+		"obsidian": "latest",
+		"postcss": "^8.5.1",
+		"tailwindcss": "^3.4.17",
+		"tslib": "2.4.0",
+		"typescript": "^5.7.3",
+		"vite": "^6.0.11",
+		"zod-to-json-schema": "^3.24.1"
+	},
+	"dependencies": {
+		"class-variance-authority": "^0.7.1",
+		"clsx": "^2.1.1",
+		"franc": "^6.2.0",
+		"lowdb": "^7.0.1",
+		"lucide-react": "^0.474.0",
+		"luxon": "^3.5.0",
+		"react": "^18.3.1",
+		"react-dom": "^18.3.1",
+		"tailwind-merge": "^2.6.0",
+		"tesseract.js": "^6.0.0",
+		"zod": "^3.24.1",
+		"zustand": "^5.0.3"
+	},
+	"prettier": {
+		"arrowParens": "always",
+		"singleQuote": true,
+		"tabWidth": 2,
+		"trailingComma": "all",
+		"semi": false
+	}
+}

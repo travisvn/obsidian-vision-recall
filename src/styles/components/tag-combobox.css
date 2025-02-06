@@ -1,0 +1,79 @@
+.tag-combobox {
+  position: relative; /* For positioning suggestions */
+  background-color: var(--background-secondary);
+  border-radius: 8px;
+  border: 1px solid var(--background-modifier-border);
+  padding: 5px;
+  display: flex; /* For horizontal layout */
+  flex-wrap: wrap; /* Allow tags to wrap */
+  align-items: center; /* Vertically align items */
+  min-height: 30px; /* Ensure a reasonable minimum height */
+}
+
+.tag-input {
+  border: none;
+  outline: none;
+  flex-grow: 1; /* Take up remaining space */
+  padding: 5px;
+  min-width: 100px; /* Prevent collapsing when empty */
+}
+
+.selected-tags {
+  display: flex;
+  flex-wrap: wrap;
+  margin-right: 5px; /* Spacing from input */
+}
+
+.tag-pill {
+  /* background-color: var(--interactive-accent); */
+  background-color: var(--background-secondary-alt);
+  color: var(--text-on-accent);
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 0.9em;
+  margin: 2px;
+  display: inline-flex; /* For button alignment */
+  align-items: center;
+}
+
+.remove-tag-button {
+  background: none;
+  border: none;
+  color: #666;
+  cursor: pointer;
+  margin-left: 5px;
+  font-size: 0.8em;
+  padding: 0; /* Reset padding */
+  line-height: 1; /* Reset line-height */
+  width: 16px;
+  height: 16px;
+}
+
+.suggestions-list {
+  position: absolute; /* Position below the input */
+  top: 100%; /* Below the tag-combobox */
+  left: 0;
+  right: 0;
+  background-color: var(--background-secondary);
+  border: 1px solid var(--background-modifier-border);
+  /* border-top: none; */
+  /* border-radius: 0 0 4px 4px; */
+  border-radius: 4px;
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  z-index: 10; /* Ensure it's above other content */
+  max-height: 200px; /* Limit height for scrollability */
+  overflow-y: auto;
+  overflow-x: clip;
+  box-sizing: border-box;
+}
+
+.suggestions-list li {
+  padding: 8px 10px;
+  cursor: pointer;
+}
+
+.suggestions-list li:hover {
+  background-color: var(--background-modifier-border);
+}

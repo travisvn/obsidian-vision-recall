@@ -1,0 +1,53 @@
+.config-modal-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  padding: 1rem;
+}
+
+.config-field {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.5rem;
+  /* padding: 0.5rem 0; */
+  padding-bottom: 1rem;
+  border-bottom: 1px solid var(--background-modifier-border);
+}
+
+.config-field label {
+  font-weight: 500;
+  /* margin-bottom: 0.25rem; */
+}
+
+.config-field-checkbox-label {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 0.5rem;
+  cursor: pointer;
+}
+
+.config-field input[type='text'],
+.config-field input[type='number'],
+.config-field select {
+  padding: 0.5rem;
+  border-radius: 4px;
+  border: 1px solid var(--background-modifier-border);
+  background: var(--background-primary);
+  color: var(--text-normal);
+}
+
+.config-multiselect {
+  height: 100px;
+  padding: 0.5rem;
+}
+
+.config-modal-controls {
+  display: flex;
+  gap: 1rem;
+  justify-content: flex-end;
+  /* padding: 1rem 0; */
+  margin-top: 1rem;
+}
