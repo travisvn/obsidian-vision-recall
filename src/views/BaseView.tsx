@@ -151,6 +151,7 @@ export const useBaseView = ({ initialMetadata, viewMode, onViewModeChange }: Bas
       const lowerCaseQuery = filters.searchQuery.toLowerCase();
       currentMetadata = currentMetadata.filter(item => {
         return (
+          item.title.toLowerCase().includes(lowerCaseQuery) ||
           item.originalFilename.toLowerCase().includes(lowerCaseQuery) ||
           (item.ocrText && item.ocrText.toLowerCase().includes(lowerCaseQuery)) ||
           (item.generatedNotes && item.generatedNotes.toLowerCase().includes(lowerCaseQuery)) ||

@@ -154,7 +154,8 @@ export async function llmSuggestTagsAndTitle(settings: VisionRecallPluginSetting
 
     // Attempt Zod parsing first
     try {
-      const parsedResponse = JSON.parse(llmResponseText);
+      const jsonString = extractJSONFromResponse(llmResponseText);
+      const parsedResponse = JSON.parse(jsonString);
       const result = TagsSchema.safeParse(parsedResponse);
 
       if (result.success) {
@@ -323,4 +324,27 @@ export async function getModels(settings: VisionRecallPluginSettings): Promise<s
   }
 
   return models;
+}
+
+function extractJSONFromResponse(responseText: string): string {
+  // Handle markdown code blocks
+  const withoutBackticks = responseText.replace(/```(json)?/g, '');
+
+  // Find first { and last } accounting for potential whitespace
+  const firstBrace = withoutBackticks.indexOf('{');
+  const lastBrace = withoutBackticks.lastIndexOf('}');
+
+  if (firstBrace === -1 || lastBrace === -1) return responseText;
+
+  // Include everything from first { to last }
+  let jsonCandidate = withoutBackticks.slice(firstBrace, lastBrace + 1);
+
+  // Clean common LLM artifacts
+  jsonCandidate = jsonCandidate
+    .replace(/,\s*}/g, '}') // Remove trailing commas
+    .replace(/,\s*]/g, ']') // Remove trailing commas in arrays
+    .replace(/\\"/g, '"')   // Unescape quotes
+    .replace(/\n/g, '');    // Remove newlines
+
+  return jsonCandidate;
 }

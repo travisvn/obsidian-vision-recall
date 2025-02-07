@@ -58,7 +58,7 @@ const GalleryView = (props: BaseViewProps) => {
           >
             <option value="timestamp">Date & Time</option>
             <option value="screenshotFilename">Screenshot Filename</option>
-            <option value="notePath">Note Path</option>
+            <option value="title">Title</option>
           </select>
           <button
             aria-label={`Sort by ${sortCriteria.column} ${sortCriteria.direction === 'desc' ? 'ascending' : 'descending'}`}
@@ -149,7 +149,8 @@ const GalleryView = (props: BaseViewProps) => {
                   openNote(item.notePath, item?.uniqueTag || item?.uniqueName || null);
                 }}
               >
-                {item.screenshotFilename}
+                {/* {item.screenshotFilename} */}
+                {item?.title || item?.screenshotFilename}
               </div>
               <div className="gallery-date">
                 {DateTime.fromISO(item.timestamp).toFormat('yyyy/MM/dd HH:mm')}

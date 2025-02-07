@@ -29,3 +29,11 @@ export async function initializeFolders(plugin: VisionRecallPlugin) {
     return false;
   }
 }
+
+export function sanitizeFilename(input: string): string {
+  // Define a regex pattern to match problematic filename characters
+  const forbiddenChars = /[<>:"\/\\|?*\x00-\x1F]/g
+
+  // Replace them with an empty string
+  return input.replace(forbiddenChars, '')
+}

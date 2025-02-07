@@ -64,10 +64,10 @@ const ListView = (props: BaseViewProps) => {
           </strong>
           <strong
             aria-label='Sort by note path'
-            onClick={() => handleSort('notePath')}
+            onClick={() => handleSort('title')}
             style={{ cursor: 'pointer' }}
           >
-            Note {sortCriteria.column === 'notePath' && (sortCriteria.direction === 'asc' ? '▲' : '▼')}
+            Note {sortCriteria.column === 'title' && (sortCriteria.direction === 'asc' ? '▲' : '▼')}
           </strong>
           <strong
             aria-label='Sort by timestamp'
@@ -98,7 +98,8 @@ const ListView = (props: BaseViewProps) => {
               onClick={() => openNote(item.notePath, item?.uniqueTag || item?.uniqueName || null)}
               className='link'
             >
-              {item.notePath.split('/').pop()}
+              {/* {item.notePath.split('/').pop()} */}
+              {item.title}
             </span>
             <span>{DateTime.fromISO(item.timestamp).toFormat('yyyy/MM/dd HH:mm')}</span>
             <span>{item.extractedTags ? item.extractedTags.join(', ') : 'No Tags'}</span>

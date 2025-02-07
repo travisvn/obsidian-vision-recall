@@ -10,6 +10,7 @@ import { PluginLogger } from '@/lib/Logger';
 import { base64EncodeImage } from '@/lib/encode';
 import { visionLLMResponseCategoriesMap } from '@/data/reference';
 import { computeFileHash, shouldProcessImage } from '@/lib/image-utils';
+import { sanitizeFilename } from './shared-functions';
 
 export type DeleteScreenshotMetadataParams = {
   identity: string;
@@ -188,7 +189,7 @@ export class ScreenshotProcessor {
     };
   }
 
-  private async prepareFilePaths(imageFile: TFile, skipUniqueName: boolean): Promise<{
+  private async prepareFilePaths(imageFile: TFile, skipUniqueName: boolean, noteTitle: string): Promise<{
     screenshotStorageFolder: string;
     uniqueName: string;
     uniqueScreenshotFilename: string;
@@ -199,9 +200,10 @@ export class ScreenshotProcessor {
       await this.app.vault.adapter.mkdir(screenshotStorageFolder);
     }
 
-    const timestamp = Date.now();
-    let uniqueName = skipUniqueName ? imageFile.basename : `${imageFile.basename}-${timestamp}`;
-    uniqueName = uniqueName.replace(/ /g, '_');
+    // const timestamp = Date.now();
+    // let uniqueName = skipUniqueName ? imageFile.basename : `${imageFile.basename}-${timestamp}`;
+    // uniqueName = uniqueName.replace(/ /g, '_');
+    const uniqueName = sanitizeFilename(noteTitle).replace(/ /g, '_');
     const uniqueScreenshotFilename = `${uniqueName}.${imageFile.extension}`;
     const newScreenshotPath = normalizePath(`${screenshotStorageFolder}/${uniqueScreenshotFilename}`);
 
@@ -241,7 +243,10 @@ export class ScreenshotProcessor {
         formattedTags
       } = processedContent;
 
-      const paths = await this.prepareFilePaths(imageFile, skipUniqueName);
+      const noteTitle = await this.generateNoteTitle(imageFile, tagsAndTitle);
+      if (!noteTitle || this.progressManager.isStoppedByUser()) return false;
+
+      const paths = await this.prepareFilePaths(imageFile, skipUniqueName, noteTitle);
       if (this.progressManager.isStoppedByUser()) return false;
 
       this.progressManager.updateProgress('Saving results...', 20);
@@ -405,6 +410,34 @@ export class ScreenshotProcessor {
     }
   }
 
+  private async generateNoteTitle(imageFile: TFile, tagsAndTitle: TagsAndTitle): Promise<string | null> {
+    try {
+      const outputNotesFolder = normalizePath(await this.plugin.getFolderFromSettingsKey('outputNotesFolderPath'));
+
+      const noteTitle = tagsAndTitle.title || imageFile.basename;
+      let noteFileName = `${noteTitle} Notes.md`;
+      let notePath = normalizePath(`${outputNotesFolder}/${noteFileName}`);
+
+      let counter = 1;
+      while (this.app.vault.getAbstractFileByPath(notePath) && counter < 100) {
+        noteFileName = `${noteTitle} Notes (${counter}).md`;
+        notePath = normalizePath(`${outputNotesFolder}/${noteFileName}`);
+        counter++;
+      }
+
+      if (counter >= 100) {
+        new Notice('Failed to create note. Too many notes with the same name.');
+        return null;
+      }
+
+      return noteFileName.replace('.md', '');
+    } catch (error) {
+      this.logger.error('Error generating note title:', error);
+      new Notice('Error generating note title. See console for details.');
+      return null;
+    }
+  }
+
   private async createObsidianNote(
     imageFile: TFile,
     newScreenshotPath: string,
@@ -419,13 +452,13 @@ export class ScreenshotProcessor {
     try {
       const outputNotesFolder = normalizePath(await this.plugin.getFolderFromSettingsKey('outputNotesFolderPath'));
 
-      const noteTitleBase = imageFile.basename;
-      let noteTitle = `${noteTitleBase}-notes.md`;
+      const noteTitleBase = tagsAndTitle.title || imageFile.basename;
+      let noteTitle = `${noteTitleBase} Notes.md`;
       let notePath = normalizePath(`${outputNotesFolder}/${noteTitle}`);
 
       let counter = 1;
       while (this.app.vault.getAbstractFileByPath(notePath) && counter < 100) {
-        noteTitle = `${noteTitleBase}-notes (${counter}).md`;
+        noteTitle = `${noteTitleBase} Notes (${counter}).md`;
         notePath = normalizePath(`${outputNotesFolder}/${noteTitle}`);
         counter++;
       }
@@ -521,7 +554,9 @@ export class ScreenshotProcessor {
         metadataPath: metadataPath,
         uniqueName: uniqueName,
         uniqueTag: linkingTag,
-        hash: hash
+        hash: hash,
+        size: imageFile.stat.size,
+        mtime: imageFile.stat.mtime
       };
 
       const dataStoreEntry = {

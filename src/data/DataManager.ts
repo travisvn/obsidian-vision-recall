@@ -34,13 +34,14 @@ export interface UserData {
   uniqueTag?: string;
 
   hash?: string;
+  size?: number;
+  mtime?: number;
 
   /** Allows additional key-value pairs for extensibility */
   [key: string]: unknown;
 }
 
-/** Defines the structure of stored data, keeping list/map for efficient lookups */
-export interface StoredData extends VisionRecallPluginSettings {
+export interface OtherData {
   userData: {
     list: string[]; // Maintains entry order
     map: Record<string, UserData>; // Maps ID -> entry for quick lookup
@@ -51,12 +52,14 @@ export interface StoredData extends VisionRecallPluginSettings {
   processedFileRecords: Record<string, ProcessedFileRecord>;
   processedHashes: Set<string>;
   minimizedProgressDisplay: boolean;
+}
+
+/** Defines the structure of stored data, keeping list/map for efficient lookups */
+export interface StoredData extends VisionRecallPluginSettings, OtherData {
   [key: string]: unknown;
 }
 
-/** Default empty structure to initialize LowDB */
-const DEFAULT_DATA: StoredData = {
-  ...DEFAULT_SETTINGS,
+const DEFAULT_OTHER_DATA: OtherData = {
   userData: {
     list: [],
     map: {}
@@ -67,6 +70,12 @@ const DEFAULT_DATA: StoredData = {
   processedFileRecords: {},
   processedHashes: new Set(),
   minimizedProgressDisplay: false
+}
+
+/** Default empty structure to initialize LowDB */
+const DEFAULT_STORED_DATA: StoredData = {
+  ...DEFAULT_SETTINGS,
+  ...DEFAULT_OTHER_DATA,
 };
 
 /** Manages persistent user data using LowDB and Obsidian's saveData */
@@ -78,7 +87,7 @@ export class DataManager extends Events {
   constructor(plugin: VisionRecallPlugin) {
     super();
     this.plugin = plugin;
-    this.db = new Low(new Memory(), DEFAULT_DATA);
+    this.db = new Low(new Memory(), DEFAULT_STORED_DATA);
 
     // Cleanup interval when plugin unloads
     plugin.register(() => this.stopIntakeDirectoryPolling());
@@ -91,7 +100,7 @@ export class DataManager extends Events {
       const parsedData = customParse(savedData) as StoredData;
 
       // Initialize with default data structure
-      this.db.data = { ...DEFAULT_DATA };
+      this.db.data = { ...DEFAULT_STORED_DATA };
 
       // Carefully merge saved data with defaults
       if (parsedData) {
@@ -191,6 +200,11 @@ export class DataManager extends Events {
     // Cleanup processedFileRecords
     const recordsToDelete: string[] = [];
     for (const [filePath, record] of Object.entries(this.db.data.processedFileRecords)) {
+      if (!record?.mtime || !record?.size) {
+        recordsToDelete.push(filePath);
+        continue;
+      }
+
       const recordDate = DateTime.fromMillis(record.mtime);
       if (now.diff(recordDate, 'days').days > retentionDays) {
         recordsToDelete.push(filePath);
@@ -258,7 +272,7 @@ export class DataManager extends Events {
     if (!this.db.data.userData.map[id]) return;
 
     // Remove the entry from the processedFileRecords
-    this.removeProcessedFileRecordAndHash(this.db.data.processedFileRecords[id].hash, id);
+    this.removeProcessedFileRecordAndHash(id, this.db.data.processedFileRecords[id].hash);
     this.db.data.userData.list = this.db.data.userData.list.filter(existingId => existingId !== id);
     delete this.db.data.userData.map[id];
 
@@ -422,13 +436,23 @@ export class DataManager extends Events {
     return this.db.data.processedHashes;
   }
 
-  async addProcessedFileRecord(imageHash: string, record: ProcessedFileRecord) {
-    this.db.data.processedFileRecords[imageHash] = record;
+  async addProcessedFileRecord(id: string, record: ProcessedFileRecord) {
+    this.db.data.processedFileRecords[id] = record;
     await this.persist();
   }
 
-  async removeProcessedFileRecord(imageHash: string) {
-    delete this.db.data.processedFileRecords[imageHash];
+  async removeProcessedFileRecord(id: string, hash: string = '') {
+    if (!this.db.data.processedFileRecords[id]) {
+      this.plugin.logger.warn('DataManager: Record not found in processedFileRecords');
+      if (hash != '' && this.db.data.processedFileRecords[hash]) {
+        this.plugin.logger.warn('DataManager: Hash found in processedFileRecords');
+        delete this.db.data.processedFileRecords[hash];
+      } else {
+        return;
+      }
+    } else {
+      delete this.db.data.processedFileRecords[id];
+    }
     await this.persist();
   }
 
@@ -438,18 +462,31 @@ export class DataManager extends Events {
   }
 
   async removeProcessedHash(hash: string) {
+    if (!this.db.data.processedHashes.has(hash)) {
+      this.plugin.logger.warn('DataManager: Hash not found in processedHashes');
+      return;
+    }
     this.db.data.processedHashes.delete(hash);
     await this.persist();
   }
 
-  async addProcessedFileRecordAndHash(imageHash: string, record: ProcessedFileRecord, hash: string) {
-    this.db.data.processedFileRecords[imageHash] = record;
+  async addProcessedFileRecordAndHash(id: string, record: ProcessedFileRecord, hash: string) {
+    this.db.data.processedFileRecords[id] = record;
     this.db.data.processedHashes.add(hash);
     await this.persist();
   }
 
-  async removeProcessedFileRecordAndHash(imageHash: string, hash: string) {
-    delete this.db.data.processedFileRecords[imageHash];
+  async removeProcessedFileRecordAndHash(id: string, hash: string) {
+    if (!this.db.data.processedFileRecords[id]) {
+      this.plugin.logger.warn('DataManager: Record not found in processedFileRecords');
+      if (this.db.data.processedFileRecords[hash]) {
+        this.plugin.logger.warn('DataManager: Hash found in processedFileRecords');
+        delete this.db.data.processedFileRecords[hash];
+      }
+    } else {
+      delete this.db.data.processedFileRecords[id];
+    }
+
     this.db.data.processedHashes.delete(hash);
     await this.persist();
   }
@@ -607,5 +644,16 @@ export class DataManager extends Events {
       message: 'Database cleanup completed successfully',
       details: stats
     };
+  }
+
+  async deleteAllEntries() {
+    try {
+      this.db.data = { ...this.db.data, ...DEFAULT_STORED_DATA };
+      await this.persist();
+      return true;
+    } catch (error) {
+      this.plugin.logger.error('Failed to delete all entries:', error);
+      return false;
+    }
   }
 }

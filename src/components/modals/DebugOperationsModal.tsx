@@ -17,6 +17,7 @@ const DebugOperationsView = ({
 }) => {
   const [cleanupResults, setCleanupResults] = useState<CleanupResults | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [deleteAllEntriesResults, setDeleteAllEntriesResults] = useState<boolean | null>(null);
 
   const handleCleanup = async () => {
     try {
@@ -32,9 +33,28 @@ const DebugOperationsView = ({
     }
   };
 
+  const handleDeleteAllEntries = async () => {
+    const results = await plugin.dataManager.deleteAllEntries();
+    setDeleteAllEntriesResults(results);
+  };
+
   return (
     <div className="config-modal-container">
       <div className="debug-operations-content">
+        <button
+          className="mod-warning cursor-pointer"
+          onClick={handleDeleteAllEntries}
+        >
+          Delete All Entries
+        </button>
+        {deleteAllEntriesResults && (
+          <div className="debug-results">
+            <h4>Delete All Entries Results</h4>
+            <div className="results-details">
+              <span>{deleteAllEntriesResults ? 'Success' : 'Failed'}</span>
+            </div>
+          </div>
+        )}
         <div className="debug-section">
           <h3>Database Maintenance</h3>
           <div className="debug-description">
