@@ -251,7 +251,8 @@ type OpenAIModelsResponse = {
  */
 async function fetchOpenAIModels(endpointUrl: string, apiKey: string): Promise<OpenAIModel[]> {
   try {
-    const response = await fetch(`${endpointUrl}/v1/models`, {
+    let endpoint = adjustEndpoint(endpointUrl, true)
+    const response = await fetch(`${endpoint}/v1/models`, {
       headers: {
         'Authorization': `Bearer ${apiKey}`,
         'Content-Type': 'application/json'

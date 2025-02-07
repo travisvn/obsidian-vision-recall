@@ -592,19 +592,6 @@
     --dialog-height: calc(min(auto, 100%));
   }
 
-/* .model-item {
-    text-align: center;
-    width: 100%;
-    cursor: pointer;
-    padding: 0.25rem 0.5rem;
-    border-radius: 4px;
-    transition: background-color 0.2s;
-  }
-
-  .model-item:hover {
-    background-color: var(--background-modifier-hover);
-  } */
-
 .settings-display {
     padding: 1rem;
     width: 100%;

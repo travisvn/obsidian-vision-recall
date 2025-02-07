@@ -126,8 +126,8 @@ const GalleryView = (props: BaseViewProps) => {
                         const shouldDelete = window.confirm('Are you sure you want to delete this screenshot and its metadata?');
                         if (shouldDelete) {
                           await plugin.screenshotProcessor.deleteScreenshotMetadata({
-                            identity: item.timestamp,
-                            identityType: 'timestamp'
+                            identity: item.id,
+                            identityType: 'id'
                           });
                           await refreshMetadata();
                         }

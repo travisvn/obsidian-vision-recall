@@ -543,7 +543,7 @@ export class ScreenshotProcessor {
   async deleteScreenshotMetadata(params: DeleteScreenshotMetadataParams): Promise<void> {
     const screenshotStorageFolder = normalizePath(this.settings.screenshotStorageFolderPath);
 
-    const metadata = this.plugin.metadata;
+    let metadata = this.plugin.metadata;
 
     let metadataToDelete;
     if (params.identityType === 'id') {
@@ -551,6 +551,17 @@ export class ScreenshotProcessor {
     } else if (params.identityType === 'timestamp') {
       metadataToDelete = metadata.find(item => item.timestamp === params.identity);
     }
+
+    if (!metadataToDelete) {
+      metadata = this.plugin.dataManager.getAllEntries();
+      if (params.identityType === 'id') {
+        metadataToDelete = metadata.find(item => item.id === params.identity);
+      } else if (params.identityType === 'timestamp') {
+        metadataToDelete = metadata.find(item => item.timestamp === params.identity);
+      }
+    }
+
+    await this.plugin.dataManager.removeEntry(metadataToDelete.id);
 
     if (metadataToDelete) {
       const currentMetadata = metadataToDelete;
