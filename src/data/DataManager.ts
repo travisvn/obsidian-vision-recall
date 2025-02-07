@@ -215,12 +215,35 @@ export class DataManager extends Events {
     }
   }
 
+  /** Calculate and update available tags and tag counts from all entries */
+  private calculateTags() {
+    const newAvailableTags = new Set<string>();
+    const newTagCounts: Record<string, number> = {};
+
+    // Process all entries
+    for (const id of this.db.data.userData.list) {
+      const entry = this.db.data.userData.map[id];
+      if (entry.extractedTags) {
+        for (const tag of entry.extractedTags) {
+          newAvailableTags.add(tag);
+          newTagCounts[tag] = (newTagCounts[tag] || 0) + 1;
+        }
+      }
+    }
+
+    this.db.data.availableTags = newAvailableTags;
+    this.db.data.tagCounts = newTagCounts;
+  }
+
   /** Add or update an entry, ensuring JSON safety */
   async addOrUpdateEntry(entry: UserData) {
     if (!this.db.data.userData.map[entry.id]) {
       this.db.data.userData.list.push(entry.id); // Maintain order
     }
     this.db.data.userData.map[entry.id] = this.sanitizeForSaving(entry) as UserData;
+
+    // Recalculate tags whenever an entry is added or updated
+    this.calculateTags();
 
     await this.cleanupProcessedRecords(); // Run cleanup when adding new entries
     await this.persist();
@@ -232,6 +255,9 @@ export class DataManager extends Events {
 
     this.db.data.userData.list = this.db.data.userData.list.filter(existingId => existingId !== id);
     delete this.db.data.userData.map[id];
+
+    // Recalculate tags after removing an entry
+    this.calculateTags();
 
     await this.persist();
   }
