@@ -3,7 +3,7 @@
 	"name": "Vision Recall",
 	"version": "1.0.0",
 	"minAppVersion": "0.15.0",
-	"description": "Transform screenshots into searchable Obsidian notes using AI vision and text analysis.",
+	"description": "Transform screenshots into searchable notes using AI vision and text analysis.",
 	"author": "Travis Van Nimwegen",
 	"authorUrl": "https://travis.engineer",
 	"isDesktopOnly": true
