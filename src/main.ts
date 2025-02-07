@@ -404,13 +404,14 @@ export default class VisionRecallPlugin extends Plugin {
 	}
 
 	async loadScreenshotMetadata(): Promise<void> {
-		this.metadata = await this.fetchScreenshotMetadata();
+		// Update metadata from DataManager instead of fetching directly
+		this.metadata = this.dataManager.getAllEntries();
 	}
 
 	async loadScreenshotMetadataAndReturn(): Promise<any[]> {
-		const fetchedMetadata = await this.fetchScreenshotMetadata();
-		this.metadata = fetchedMetadata;
-		return fetchedMetadata;
+		// Update metadata from DataManager instead of fetching directly
+		this.metadata = this.dataManager.getAllEntries();
+		return this.metadata;
 	}
 
 	async fetchScreenshotMetadata(): Promise<any[]> {
@@ -448,11 +449,11 @@ export default class VisionRecallPlugin extends Plugin {
 			this.logger.error(`Error reading screenshot storage folder: ${screenshotStorageFolder}`, folderError);
 		}
 
-		// this.logger.info(metadataArray);
+		// Update DataManager with the fetched metadata
+		await this.dataManager.setAvailableTags(availableTags);
+		await this.dataManager.setTagCounts(tagCounts);
 
-		this.dataManager.setAvailableTags(availableTags);
-		this.dataManager.setTagCounts(tagCounts);
-		// this.logger.info(`Available tags: ${Array.from(availableTags)}`);
+		// Return the metadata array which will be used to update the plugin's metadata property
 		return metadataArray;
 	}
 

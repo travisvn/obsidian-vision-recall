@@ -180,6 +180,41 @@ export class DataManager extends Events {
     return entry ? this.restoreFromLoad(entry) : undefined;
   }
 
+  /** Cleanup old processed records based on retention policy */
+  private async cleanupProcessedRecords() {
+    const now = DateTime.now();
+    const retentionDays = 30; // Keep records for 30 days
+
+    // Cleanup processedFileRecords
+    const recordsToDelete: string[] = [];
+    for (const [filePath, record] of Object.entries(this.db.data.processedFileRecords)) {
+      const recordDate = DateTime.fromMillis(record.mtime);
+      if (now.diff(recordDate, 'days').days > retentionDays) {
+        recordsToDelete.push(filePath);
+      }
+    }
+
+    recordsToDelete.forEach(filePath => {
+      delete this.db.data.processedFileRecords[filePath];
+    });
+
+    // Cleanup processedHashes if they're not referenced in processedFileRecords
+    const activeHashes = new Set(
+      Object.values(this.db.data.processedFileRecords)
+        .map(record => record.hash)
+        .filter(hash => hash !== undefined)
+    );
+
+    this.db.data.processedHashes = new Set(
+      [...this.db.data.processedHashes].filter(hash => activeHashes.has(hash))
+    );
+
+    if (recordsToDelete.length > 0) {
+      await this.persist();
+      this.plugin.logger.info(`Cleaned up ${recordsToDelete.length} old processed records`);
+    }
+  }
+
   /** Add or update an entry, ensuring JSON safety */
   async addOrUpdateEntry(entry: UserData) {
     if (!this.db.data.userData.map[entry.id]) {
@@ -187,6 +222,7 @@ export class DataManager extends Events {
     }
     this.db.data.userData.map[entry.id] = this.sanitizeForSaving(entry) as UserData;
 
+    await this.cleanupProcessedRecords(); // Run cleanup when adding new entries
     await this.persist();
   }
 
@@ -202,13 +238,10 @@ export class DataManager extends Events {
 
   /** Persist changes while preserving other settings */
   private async persist() {
-    const existingData = await this.plugin.loadData();
-    const parsedExistingData = customParse(existingData) as StoredData;
-
     const dataToPersist = {
-      ...parsedExistingData, // Keep other settings unchanged
-      userData: this.db.data.userData, // Update only userData
-      config: this.db.data.config, // Update config
+      ...DEFAULT_SETTINGS, // Start with default settings
+      userData: this.db.data.userData,
+      config: this.db.data.config,
       availableTags: this.db.data.availableTags,
       tagCounts: this.db.data.tagCounts,
       processedFileRecords: this.db.data.processedFileRecords,
@@ -217,10 +250,7 @@ export class DataManager extends Events {
     }
 
     await this.plugin.saveData(customStringify(dataToPersist));
-
-    this.trigger('data-updated'); // Notify listeners
-
-    // await this.persistDataToFile(); // Persist data to file
+    this.trigger('data-updated');
   }
 
   async persistDataToFile(backup: boolean = false) {
@@ -230,8 +260,8 @@ export class DataManager extends Events {
     }
 
     const dataToSave = {
-      userData: this.db.data.userData, // Update only userData
-      config: this.db.data.config, // Update config
+      userData: this.db.data.userData,
+      config: this.db.data.config,
       availableTags: this.db.data.availableTags,
       tagCounts: this.db.data.tagCounts,
       processedFileRecords: this.db.data.processedFileRecords,
@@ -242,7 +272,7 @@ export class DataManager extends Events {
     const dataStr = customStringify(dataToSave, true);
     const filename = backup ? 'userData_backup.json' : 'userData.json';
 
-    const screenshotStorageFolder = this.plugin.getFolderFromSettingsKey('screenshotStorageFolderPath');
+    const screenshotStorageFolder = await this.plugin.getFolderFromSettingsKey('screenshotStorageFolderPath');
     const persistFileLocation = normalizePath(`${screenshotStorageFolder}/${filename}`);
 
     if (!this.plugin.app.vault.getAbstractFileByPath(persistFileLocation)) {
@@ -250,15 +280,39 @@ export class DataManager extends Events {
       this.plugin.logger.info("created new file", persistFileLocation);
     } else {
       const file = this.plugin.app.vault.getFileByPath(persistFileLocation);
-      if (file) { // If the file exists, rename it and create a new one with the current date
-        const newLocationForExistingFile = normalizePath(`${screenshotStorageFolder}/${filename}_${DateTime.now().toFormat('yyyy-MM-dd')}`);
-        this.plugin.logger.info("newLocationForExistingFile", newLocationForExistingFile);
+      if (file) {
+        // Create a backup with date
+        const backupDate = DateTime.now();
+        const newLocationForExistingFile = normalizePath(
+          `${screenshotStorageFolder}/${filename}_${backupDate.toFormat('yyyy-MM-dd')}`
+        );
 
-        // Essentially creates a daily backup
+        // Only create a new backup if one doesn't exist for today
         if (!this.plugin.app.vault.getAbstractFileByPath(newLocationForExistingFile)) {
           const currentFileContent = await this.plugin.app.vault.read(file);
           await this.plugin.app.vault.create(newLocationForExistingFile, currentFileContent);
           this.plugin.logger.info("created new backup file", newLocationForExistingFile);
+
+          // Cleanup old backups (keep last 7 days)
+          const backupRetentionDays = 7;
+          const files = this.plugin.app.vault.getFiles();
+          const backupFiles = files.filter(f => {
+            const path = f.path;
+            return path.startsWith(screenshotStorageFolder) &&
+              path.includes('userData_backup') &&
+              path.match(/\d{4}-\d{2}-\d{2}/);
+          });
+
+          for (const backupFile of backupFiles) {
+            const dateMatch = backupFile.path.match(/(\d{4}-\d{2}-\d{2})/);
+            if (dateMatch) {
+              const backupFileDate = DateTime.fromFormat(dateMatch[1], 'yyyy-MM-dd');
+              if (backupDate.diff(backupFileDate, 'days').days > backupRetentionDays) {
+                await this.plugin.app.vault.delete(backupFile);
+                this.plugin.logger.info("deleted old backup file", backupFile.path);
+              }
+            }
+          }
         }
 
         await this.plugin.app.vault.modify(file, dataStr);
@@ -322,6 +376,7 @@ export class DataManager extends Events {
       ...updatedConfig
     };
     await this.persist();
+    this.trigger('config-updated'); // Emit config-updated event
   }
 
   getProcessedFileRecords() {
@@ -365,6 +420,8 @@ export class DataManager extends Events {
   }
 
   async startIntakeDirectoryPolling() {
+    if (!this.db.data.config.enableIntakeFolderPolling) return;
+
     // consider intakeFolderPollingInterval as seconds (so convert to ms)
     const interval = (this.db.data.config.intakeFolderPollingInterval || DefaultConfig.intakeFolderPollingInterval) * 1000;
 

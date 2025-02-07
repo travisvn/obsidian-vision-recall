@@ -8,7 +8,7 @@ import { QueueItem } from '@/services/ProcessingQueue';
 import { useQueueStore } from '@/stores/queueStore';
 import { ProcessingQueue } from '@/services/ProcessingQueue';
 import { CheckCircle2, XCircle, Pause, Play, Square } from 'lucide-react';
-import { ProcessingDisplay } from '@/components/ProcessingDisplay';
+// import { ProcessingDisplay } from '@/components/ProcessingDisplay';
 
 const QueueControls: React.FC = () => {
   const { status, actions } = useQueueStore();
@@ -140,7 +140,7 @@ const ProcessingQueueView: React.FC = () => {
       <QueueControls />
 
       {/* Only show ProcessingDisplay if we're processing and not paused */}
-      {status.isProcessing && !status.isPaused && <ProcessingDisplay />}
+      {/* {status.isProcessing && !status.isPaused && <ProcessingDisplay />} */}
     </div>
   );
 };
