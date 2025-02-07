@@ -10,6 +10,8 @@
 
 Vision Recall is an Obsidian plugin that automatically processes screenshots you take or import, using AI to extract text (OCR), analyze image content (Vision LLM), and generate insightful notes, all seamlessly integrated into your Obsidian vault. **Stop losing valuable information trapped in images – make your screenshots searchable, linkable, and knowledge-rich!**
 
+ ![Obsidian Vision Recall Plugin Settings Screenshot](https://ud8v76kv5b.ufs.sh/f/1lHAtGEcemsO7dCunZWzwuZpH0xrBnPKXyVjUGi3taIWhoSk)
+
 ## ✨ Key Features that Supercharge Your Screenshot Workflow
 
 - **📸 Automatic Screenshot Intake:**
