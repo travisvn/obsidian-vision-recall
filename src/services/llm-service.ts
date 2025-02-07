@@ -1,5 +1,5 @@
 import { OPENROUTER_HEADERS } from '@/constants';
-import { tagsJsonSchema } from '@/lib/tag-utils';
+import { tagsJsonSchema, TagsSchema } from '@/lib/tag-utils';
 import { VisionRecallPluginSettings } from '@/types/settings-types';
 
 export const VISION_LLM_PROMPT = "Analyze this screenshot and describe its content and identify the type of screenshot if possible.";
@@ -106,24 +106,34 @@ function sanitizeTags(rawTags: any): string[] {
     .slice(0, 5);
 }
 
-export async function llmSuggestTags(settings: VisionRecallPluginSettings, notesText: string | null): Promise<string[]> {
+export const DEFAULT_TAGS_AND_TITLE = {
+  tags: [],
+  title: 'Untitled'
+}
+
+export type TagsAndTitle = {
+  tags: string[];
+  title: string;
+}
+
+export async function llmSuggestTagsAndTitle(settings: VisionRecallPluginSettings, notesText: string | null): Promise<TagsAndTitle> {
   if (!notesText) {
-    return [];
+    return DEFAULT_TAGS_AND_TITLE;
   }
 
   try {
-    const tagPrompt = `Please suggest exactly 5 relevant tags or keywords to categorize the following notes. Return ONLY a JSON array of 5 strings, nothing else. Example format: ['tag1', 'tag2', 'tag3', 'tag4', 'tag5']\n\nNotes:\n${notesText}`;
+    const tagPrompt = `Please suggest exactly 5 relevant tags or keywords to categorize the following notes as well as a title for the notes. Return ONLY a JSON object with the following properties: tags (array of strings), title (string). Example format: { title: 'Title of the notes', tags: ['tag1', 'tag2', 'tag3', 'tag4', 'tag5'] }\n\nNotes:\n${notesText}`;
 
     const tagPayload = {
       model: settings.endpointLlmModelName,
       messages: [
         { role: "user", content: tagPrompt }
       ],
-      max_tokens: 100,
+      max_tokens: 140,
       response_format: {
         type: 'json_schema',
         json_schema: {
-          name: 'tags',
+          name: 'titleAndTags',
           ...tagsJsonSchema
         },
         strict: true,
@@ -137,15 +147,44 @@ export async function llmSuggestTags(settings: VisionRecallPluginSettings, notes
     );
 
     if (!llmResponseText) {
-      return [];
+      return DEFAULT_TAGS_AND_TITLE;
     }
 
-    // Could try zod parse here
+    console.log('LLM Response Text:', llmResponseText);
 
-    return sanitizeTags(llmResponseText);
+    // Attempt Zod parsing first
+    try {
+      const parsedResponse = JSON.parse(llmResponseText);
+      const result = TagsSchema.safeParse(parsedResponse);
+
+      if (result.success) {
+        return {
+          tags: sanitizeTags(result.data.tags),
+          title: result.data.title.replace(/[\\"]/g, '').trim() || 'Untitled'
+        };
+      }
+    } catch (e) {
+      // JSON parse failed, fall through to legacy handling
+    }
+
+    // Fallback handling for non-JSON responses or invalid schemas
+    let title = 'Untitled';
+    const titleMatch = llmResponseText.match(/"title":\s*"?(.*?)"?([,}]|$)/i) ||
+      llmResponseText.match(/title:\s*"?(.*?)"?([,}]|$)/i) ||
+      llmResponseText.match(/'title':\s*"?(.*?)"?([,}]|$)/i) ||
+      llmResponseText.match(/title:\s*(.*?)[,}]/i);
+
+    if (titleMatch) {
+      title = titleMatch[1].trim().replace(/[\\"]/g, '') || 'Untitled';
+    }
+
+    return {
+      tags: sanitizeTags(llmResponseText),
+      title: title.substring(0, 200) // Limit title length
+    };
   } catch (error) {
     console.error('LLM Tag Suggestion Error:', error);
-    return [];
+    return DEFAULT_TAGS_AND_TITLE;
   }
 }
 

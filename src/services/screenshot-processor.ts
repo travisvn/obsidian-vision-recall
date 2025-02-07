@@ -1,7 +1,7 @@
 import { App, Notice, TFile, TFolder, normalizePath } from 'obsidian';
 import Tesseract, { createWorker, Worker } from 'tesseract.js';
 import { VisionRecallPluginSettings } from '@/types/settings-types';
-import { VISION_LLM_PROMPT, callLLMAPI, llmSuggestTags } from '@/services/llm-service';
+import { DEFAULT_TAGS_AND_TITLE, TagsAndTitle, VISION_LLM_PROMPT, callLLMAPI, llmSuggestTagsAndTitle } from '@/services/llm-service';
 import VisionRecallPlugin from '@/main';
 import { checkOCRText } from '@/lib/ocr-validation';
 import { formatTags, tagsToCommaString } from '@/lib/tag-utils';
@@ -145,7 +145,7 @@ export class ScreenshotProcessor {
     ocrText: string;
     visionLLMResponse: string;
     generatedNotes: string;
-    extractedTags: string[];
+    tagsAndTitle: TagsAndTitle;
     formattedTags: string;
   } | null> {
     this.progressManager.updateProgress('Performing OCR...', 10);
@@ -173,17 +173,17 @@ export class ScreenshotProcessor {
     this.progressManager.updateProgress('Generating tags...', 20);
     if (this.progressManager.isStoppedByUser()) return null;
 
-    const extractedTags = await this.generateTags(generatedNotes);
+    const tagsAndTitle = await this.generateTags(generatedNotes);
     if (this.progressManager.isStoppedByUser()) return null;
 
-    const formattedTags = tagsToCommaString(formatTags(extractedTags));
+    const formattedTags = tagsToCommaString(formatTags(tagsAndTitle.tags));
     this.logger.debug('Formatted Tags:', formattedTags);
 
     return {
       ocrText: validOCRText,
       visionLLMResponse,
       generatedNotes,
-      extractedTags,
+      tagsAndTitle,
       formattedTags
     };
   }
@@ -237,7 +237,7 @@ export class ScreenshotProcessor {
         ocrText,
         visionLLMResponse,
         generatedNotes,
-        extractedTags,
+        tagsAndTitle,
         formattedTags
       } = processedContent;
 
@@ -253,7 +253,7 @@ export class ScreenshotProcessor {
         ocrText,
         visionLLMResponse,
         generatedNotes,
-        extractedTags,
+        tagsAndTitle,
         formattedTags,
         entryId,
         paths.uniqueName
@@ -268,7 +268,7 @@ export class ScreenshotProcessor {
         ocrText,
         visionLLMResponse,
         generatedNotes,
-        extractedTags,
+        tagsAndTitle,
         formattedTags,
         noteInfo,
         entryId
@@ -392,16 +392,16 @@ export class ScreenshotProcessor {
     }
   }
 
-  private async generateTags(generatedNotes: string): Promise<string[]> {
+  private async generateTags(generatedNotes: string): Promise<TagsAndTitle> {
     try {
-      if (this.progressManager.isStoppedByUser()) return [];
-      const extractedTags = await llmSuggestTags(this.settings, generatedNotes);
-      this.logger.debug('LLM Suggested Tags:', extractedTags);
-      return extractedTags;
+      if (this.progressManager.isStoppedByUser()) return DEFAULT_TAGS_AND_TITLE;
+      const tagsAndTitle = await llmSuggestTagsAndTitle(this.settings, generatedNotes);
+      this.logger.debug('LLM Suggested Tags:', tagsAndTitle);
+      return tagsAndTitle;
     } catch (error) {
       this.logger.error('Tag Generation Error:', error);
       new Notice('Tag generation failed. See console for details.');
-      return [];
+      return DEFAULT_TAGS_AND_TITLE;
     }
   }
 
@@ -411,7 +411,7 @@ export class ScreenshotProcessor {
     ocrText: string,
     visionLLMResponse: string,
     generatedNotes: string,
-    extractedTags: string[],
+    tagsAndTitle: TagsAndTitle,
     formattedTags: string,
     id: string,
     uniqueName: string
@@ -486,7 +486,7 @@ export class ScreenshotProcessor {
     ocrText: string,
     visionLLMResponse: string,
     generatedNotes: string,
-    extractedTags: string[],
+    tagsAndTitle: TagsAndTitle,
     formattedTags: string,
     noteInfo: { notePath: string; noteTitle: string },
     entryId: string
@@ -513,7 +513,8 @@ export class ScreenshotProcessor {
         ocrText,
         visionLLMResponse,
         generatedNotes,
-        extractedTags: extractedTags,
+        title: tagsAndTitle.title,
+        extractedTags: tagsAndTitle.tags,
         formattedTags: formattedTags,
         timestamp: new Date().toISOString(),
         metadataFilename: metadataFilename,
@@ -724,7 +725,8 @@ export class ScreenshotProcessor {
       if (!file) {
         actions.updateStatus({
           message: '',
-          progress: 0
+          progress: 0,
+          isProcessing: false
         });
         return;
       }

@@ -20,6 +20,7 @@ export interface UserData {
   ocrText?: string | null;
   visionLLMResponse?: string | null;
   generatedNotes?: string | null;
+  title: string;
   extractedTags?: string[];
   // formattedTags?: string[];
   formattedTags?: string;

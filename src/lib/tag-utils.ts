@@ -2,7 +2,8 @@ import { z } from 'zod';
 import { zodToJsonSchema } from 'zod-to-json-schema';
 // Define the Zod schema
 export const TagsSchema = z.object({
-  tags: z.array(z.string()), // Ensures an array of strings
+  title: z.string(),
+  tags: z.array(z.string()),
 });
 
 // Convert Zod schema to JSON Schema
