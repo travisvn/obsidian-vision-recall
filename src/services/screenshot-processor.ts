@@ -4,7 +4,7 @@ import { VisionRecallPluginSettings } from '@/types/settings-types';
 import { DEFAULT_TAGS_AND_TITLE, TagsAndTitle, VISION_LLM_PROMPT, callLLMAPI, llmSuggestTagsAndTitle } from '@/services/llm-service';
 import VisionRecallPlugin from '@/main';
 import { checkOCRText } from '@/lib/ocr-validation';
-import { formatTags, tagsToCommaString } from '@/lib/tag-utils';
+import { formatTags, sanitizeObsidianTag, tagsToCommaString } from '@/lib/tag-utils';
 import { useQueueStore } from '@/stores/queueStore';
 import { PluginLogger } from '@/lib/Logger';
 import { base64EncodeImage } from '@/lib/encode';
@@ -252,6 +252,9 @@ export class ScreenshotProcessor {
       this.progressManager.updateProgress('Saving results...', 20);
       if (this.progressManager.isStoppedByUser()) return false;
 
+      const tagPath = sanitizeObsidianTag(paths.uniqueName);
+      const linkingTag = `#${this.settings.tagPrefix}/${tagPath}`;
+
       const noteInfo = await this.createObsidianNote(
         imageFile,
         paths.newScreenshotPath,
@@ -261,7 +264,8 @@ export class ScreenshotProcessor {
         tagsAndTitle,
         formattedTags,
         entryId,
-        paths.uniqueName
+        paths.uniqueName,
+        linkingTag
       );
       if (!noteInfo || this.progressManager.isStoppedByUser()) return false;
 
@@ -276,7 +280,8 @@ export class ScreenshotProcessor {
         tagsAndTitle,
         formattedTags,
         noteInfo,
-        entryId
+        entryId,
+        linkingTag
       );
       if (this.progressManager.isStoppedByUser()) return false;
 
@@ -414,14 +419,14 @@ export class ScreenshotProcessor {
     try {
       const outputNotesFolder = normalizePath(await this.plugin.getFolderFromSettingsKey('outputNotesFolderPath'));
 
-      const noteTitle = tagsAndTitle.title || imageFile.basename;
-      let noteFileName = `${noteTitle} Notes.md`;
-      let notePath = normalizePath(`${outputNotesFolder}/${noteFileName}`);
+      const noteTitle = sanitizeFilename(tagsAndTitle.title || imageFile.basename);
+      let noteFileName = `${noteTitle} Notes`;
+      let notePath = normalizePath(`${outputNotesFolder}/${noteFileName}.md`);
 
       let counter = 1;
       while (this.app.vault.getAbstractFileByPath(notePath) && counter < 100) {
-        noteFileName = `${noteTitle} Notes (${counter}).md`;
-        notePath = normalizePath(`${outputNotesFolder}/${noteFileName}`);
+        noteFileName = `${noteTitle} Notes (${counter})`;
+        notePath = normalizePath(`${outputNotesFolder}/${noteFileName}.md`);
         counter++;
       }
 
@@ -447,7 +452,8 @@ export class ScreenshotProcessor {
     tagsAndTitle: TagsAndTitle,
     formattedTags: string,
     id: string,
-    uniqueName: string
+    uniqueName: string,
+    linkingTag: string
   ): Promise<{ notePath: string; noteTitle: string } | null> {
     try {
       const outputNotesFolder = normalizePath(await this.plugin.getFolderFromSettingsKey('outputNotesFolderPath'));
@@ -488,8 +494,6 @@ export class ScreenshotProcessor {
       // Main note content
       const noteContent = `# Notes from Screenshot: ${noteTitleBase}\n\n${generatedNotes}`;
 
-      const linkingTag = `#${this.settings.tagPrefix}/${uniqueName}`;
-
       const metadataContent = `\n\n---\n*Screenshot Filename:* [[${newScreenshotPath}]]\n*${ocrTitle}*:\n\`\`\`\n${truncatedOcrText}...\n\`\`\`\n*${visionTitle}*:\n\`\`\`\n${truncatedVisionLLMResponse}...\n\`\`\`\n\n*Tags:* ${formattedTags}\n\n${linkingTag}\n`;
 
       const finalNoteContent = this.settings.includeMetadataInNote
@@ -522,7 +526,8 @@ export class ScreenshotProcessor {
     tagsAndTitle: TagsAndTitle,
     formattedTags: string,
     noteInfo: { notePath: string; noteTitle: string },
-    entryId: string
+    entryId: string,
+    linkingTag: string
   ): Promise<void> {
     try {
 
@@ -533,8 +538,6 @@ export class ScreenshotProcessor {
 
       const metadataFilename = `${uniqueName}.json`;
       const metadataPath = normalizePath(`${await this.plugin.getFolderFromSettingsKey('screenshotStorageFolderPath')}/${metadataFilename}`);
-
-      const linkingTag = `#${this.settings.tagPrefix}/${uniqueName}`;
 
       const metadata = {
         id: entryId,
