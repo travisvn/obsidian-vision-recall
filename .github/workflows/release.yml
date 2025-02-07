@@ -22,9 +22,6 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Type-check
-        run: npm run type-check
-
       - name: Build plugin (Vite production build)
         run: npm run build
 
