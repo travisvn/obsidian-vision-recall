@@ -32,6 +32,8 @@ export interface UserData {
   uniqueName?: string;
   uniqueTag?: string;
 
+  hash?: string;
+
   /** Allows additional key-value pairs for extensibility */
   [key: string]: unknown;
 }
@@ -241,6 +243,7 @@ export class DataManager extends Events {
       this.db.data.userData.list.push(entry.id); // Maintain order
     }
     this.db.data.userData.map[entry.id] = this.sanitizeForSaving(entry) as UserData;
+    this.addProcessedFileRecordAndHash(entry.id, { size: entry.size, mtime: entry.mtime, hash: entry.hash } as ProcessedFileRecord, entry.hash);
 
     // Recalculate tags whenever an entry is added or updated
     this.calculateTags();
@@ -253,6 +256,8 @@ export class DataManager extends Events {
   async removeEntry(id: string) {
     if (!this.db.data.userData.map[id]) return;
 
+    // Remove the entry from the processedFileRecords
+    this.removeProcessedFileRecordAndHash(this.db.data.processedFileRecords[id].hash, id);
     this.db.data.userData.list = this.db.data.userData.list.filter(existingId => existingId !== id);
     delete this.db.data.userData.map[id];
 
@@ -264,8 +269,11 @@ export class DataManager extends Events {
 
   /** Persist changes while preserving other settings */
   private async persist() {
+    // Get current settings from the plugin
+    const currentSettings = this.plugin.settings;
+
     const dataToPersist = {
-      ...DEFAULT_SETTINGS, // Start with default settings
+      ...currentSettings, // Use current settings instead of defaults
       userData: this.db.data.userData,
       config: this.db.data.config,
       availableTags: this.db.data.availableTags,
@@ -413,13 +421,13 @@ export class DataManager extends Events {
     return this.db.data.processedHashes;
   }
 
-  async addProcessedFileRecord(filePath: string, record: ProcessedFileRecord) {
-    this.db.data.processedFileRecords[filePath] = record;
+  async addProcessedFileRecord(imageHash: string, record: ProcessedFileRecord) {
+    this.db.data.processedFileRecords[imageHash] = record;
     await this.persist();
   }
 
-  async removeProcessedFileRecord(filePath: string) {
-    delete this.db.data.processedFileRecords[filePath];
+  async removeProcessedFileRecord(imageHash: string) {
+    delete this.db.data.processedFileRecords[imageHash];
     await this.persist();
   }
 
@@ -433,14 +441,14 @@ export class DataManager extends Events {
     await this.persist();
   }
 
-  async addProcessedFileRecordAndHash(filePath: string, record: ProcessedFileRecord, hash: string) {
-    this.db.data.processedFileRecords[filePath] = record;
+  async addProcessedFileRecordAndHash(imageHash: string, record: ProcessedFileRecord, hash: string) {
+    this.db.data.processedFileRecords[imageHash] = record;
     this.db.data.processedHashes.add(hash);
     await this.persist();
   }
 
-  async removeProcessedFileRecordAndHash(filePath: string, hash: string) {
-    delete this.db.data.processedFileRecords[filePath];
+  async removeProcessedFileRecordAndHash(imageHash: string, hash: string) {
+    delete this.db.data.processedFileRecords[imageHash];
     this.db.data.processedHashes.delete(hash);
     await this.persist();
   }
@@ -530,5 +538,73 @@ export class DataManager extends Events {
   async setTagCounts(counts: Record<string, number>) {
     this.db.data.tagCounts = counts;
     await this.persist();
+  }
+
+  /** Perform a comprehensive cleanup of the database */
+  async cleanupDatabase(): Promise<{ message: string; details: Record<string, number> }> {
+    const stats = {
+      removedEntries: 0,
+      removedProcessedRecords: 0,
+      removedHashes: 0,
+      fixedTags: 0
+    };
+
+    // 1. Clean up entries with missing files
+    for (const id of [...this.db.data.userData.list]) {
+      const entry = this.db.data.userData.map[id];
+      if (!entry) continue;
+
+      let shouldRemove = false;
+
+      // Check if screenshot file exists
+      if (entry.screenshotStoragePath) {
+        const screenshotExists = await this.plugin.app.vault.adapter.exists(entry.screenshotStoragePath);
+        if (!screenshotExists) {
+          shouldRemove = true;
+        }
+      }
+
+      // Check if note file exists
+      if (entry.notePath) {
+        const noteExists = await this.plugin.app.vault.adapter.exists(entry.notePath);
+        if (!noteExists) {
+          shouldRemove = true;
+        }
+      }
+
+      // Check if metadata file exists
+      if (entry.metadataPath) {
+        const metadataExists = await this.plugin.app.vault.adapter.exists(entry.metadataPath);
+        if (!metadataExists) {
+          shouldRemove = true;
+        }
+      }
+
+      if (shouldRemove) {
+        await this.removeEntry(id);
+        stats.removedEntries++;
+      }
+    }
+
+    // 2. Run the standard cleanup of processed records
+    const beforeRecords = Object.keys(this.db.data.processedFileRecords).length;
+    const beforeHashes = this.db.data.processedHashes.size;
+    await this.cleanupProcessedRecords();
+    stats.removedProcessedRecords = beforeRecords - Object.keys(this.db.data.processedFileRecords).length;
+    stats.removedHashes = beforeHashes - this.db.data.processedHashes.size;
+
+    // 3. Recalculate all tags
+    const beforeTagCount = this.db.data.availableTags.size;
+    this.calculateTags();
+    stats.fixedTags = Math.abs(beforeTagCount - this.db.data.availableTags.size);
+
+    // 4. Save changes
+    await this.persist();
+
+    // Return cleanup summary
+    return {
+      message: 'Database cleanup completed successfully',
+      details: stats
+    };
   }
 }

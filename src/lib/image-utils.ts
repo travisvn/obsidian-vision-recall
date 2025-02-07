@@ -33,7 +33,7 @@ export async function shouldProcessImage(plugin: VisionRecallPlugin, file: TFile
   const stat = file.stat;
 
   if (!onlyCheckHash) {
-    const existingRecord = (await plugin.dataManager.getProcessedFileRecords())[file.path];
+    const existingRecord = plugin.dataManager.getProcessedFileRecords()[file.path];
 
     // 1. Preliminary check: If we've seen this file path and its size & modified
     //    timestamp haven't changed, assume it's already been processed.
@@ -51,11 +51,11 @@ export async function shouldProcessImage(plugin: VisionRecallPlugin, file: TFile
   plugin.logger.debug(`Checking if hash ${JSON.stringify(processedHashes, null, 2)} has already been processed.`);
   if (processedHashes?.has(hash)) {
     // Update (or add) the record for this file path with the current metadata.
-    plugin.dataManager.addProcessedFileRecord(file.path, { size: stat.size, mtime: stat.mtime, hash });
+    // plugin.dataManager.addProcessedFileRecord(file.path, { size: stat.size, mtime: stat.mtime, hash });
     return false;
   }
 
   // 4. If the hash is new, mark the file as processed.
-  plugin.dataManager.addProcessedFileRecordAndHash(file.path, { size: stat.size, mtime: stat.mtime, hash }, hash);
+  // plugin.dataManager.addProcessedFileRecordAndHash(file.path, { size: stat.size, mtime: stat.mtime, hash }, hash);
   return true;
 }

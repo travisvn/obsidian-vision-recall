@@ -9,7 +9,7 @@ import { useQueueStore } from '@/stores/queueStore';
 import { PluginLogger } from '@/lib/Logger';
 import { base64EncodeImage } from '@/lib/encode';
 import { visionLLMResponseCategoriesMap } from '@/data/reference';
-import { shouldProcessImage } from '@/lib/image-utils';
+import { computeFileHash, shouldProcessImage } from '@/lib/image-utils';
 
 export type DeleteScreenshotMetadataParams = {
   identity: string;
@@ -496,6 +496,8 @@ export class ScreenshotProcessor {
       await this.app.vault.copy(imageFile, newScreenshotPath);
       this.logger.debug(`Screenshot saved to: ${newScreenshotPath}`);
 
+      const hash = await computeFileHash(this.plugin, imageFile);
+
       const metadataFilename = `${uniqueName}.json`;
       const metadataPath = normalizePath(`${await this.plugin.getFolderFromSettingsKey('screenshotStorageFolderPath')}/${metadataFilename}`);
 
@@ -517,7 +519,8 @@ export class ScreenshotProcessor {
         metadataFilename: metadataFilename,
         metadataPath: metadataPath,
         uniqueName: uniqueName,
-        uniqueTag: linkingTag
+        uniqueTag: linkingTag,
+        hash: hash
       };
 
       const dataStoreEntry = {

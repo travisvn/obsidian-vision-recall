@@ -1,6 +1,6 @@
 import { useObsidianApp, usePlugin } from '@/context';
 import { FileUploadModal } from '@/components/modals/FileUploadModal';
-import { FolderSync, Info, LoaderPinwheel, Plus, RefreshCcw, Settings2, LayoutGrid, List, Bug, Maximize2, Hash } from 'lucide-react';
+import { FolderSync, Info, LoaderPinwheel, Plus, RefreshCcw, Settings2, LayoutGrid, List, Bug, Maximize2, Hash, PencilRuler } from 'lucide-react';
 import { Notice, TFile } from 'obsidian';
 import React, { useEffect, useState } from 'react';
 import { DocViewerModal } from '@/components/modals/DocViewerModal';
@@ -208,7 +208,7 @@ export const MainViewHeader = ({ metadata, refreshMetadata, viewMode = 'list', o
           )}
 
           {/* Debug Modal */}
-          {IS_DEV && (
+          {plugin.settings.debugMode && (
             <button
               aria-label='Debug Modal'
               className='cursor-pointer flex flex-row items-center gap-2'
@@ -216,7 +216,7 @@ export const MainViewHeader = ({ metadata, refreshMetadata, viewMode = 'list', o
                 new DebugOperationsModal(app, plugin).open();
               }}
             >
-              <Hash className='w-4 h-4' />
+              <PencilRuler className='w-4 h-4' />
               <div className='hidden @4xl/subheader:block'>
                 Debug Modal
               </div>

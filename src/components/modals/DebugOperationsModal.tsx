@@ -1,10 +1,12 @@
-import React, { useEffect, useState } from 'react';
-import { Modal } from 'obsidian';
-import { DataManager } from '@/data/DataManager';
-import { Plugin } from 'obsidian';
-import { Config, DefaultConfig } from '@/types/config-types';
+import React, { useState } from 'react';
+import { Modal, Notice } from 'obsidian';
 import { createRoot } from 'react-dom/client';
 import VisionRecallPlugin from '@/main';
+
+interface CleanupResults {
+  message: string;
+  details: Record<string, number>;
+}
 
 const DebugOperationsView = ({
   plugin,
@@ -13,18 +15,67 @@ const DebugOperationsView = ({
   plugin: VisionRecallPlugin;
   onClose: () => void;
 }) => {
+  const [cleanupResults, setCleanupResults] = useState<CleanupResults | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
+
+  const handleCleanup = async () => {
+    try {
+      setIsLoading(true);
+      const results = await plugin.dataManager.cleanupDatabase();
+      setCleanupResults(results);
+      new Notice('Database cleanup completed');
+    } catch (error) {
+      plugin.logger.error('Error during cleanup:', error);
+      new Notice('Error during cleanup. Check console for details.');
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   return (
     <div className="config-modal-container">
-      <div className='flex flex-row gap-2 justify-center items-center flex-wrap'>
-        <button
-          className='cursor-pointer'
-          onClick={() => {
+      <div className="debug-operations-content">
+        <div className="debug-section">
+          <h3>Database Maintenance</h3>
+          <div className="debug-description">
+            Clean up the database by removing orphaned entries, recalculating tags, and performing other maintenance tasks.
+          </div>
+          <button
+            className="mod-warning cursor-pointer"
+            onClick={handleCleanup}
+            disabled={isLoading}
+          >
+            {isLoading ? 'Cleaning...' : 'Clean Database'}
+          </button>
+        </div>
 
-          }}
-        >
-          Generate Image Hashes
-        </button>
+        {cleanupResults && (
+          <div className="debug-results">
+            <h4>Cleanup Results</h4>
+            <div className="results-details">
+              <div className="result-item">
+                <span>Removed Entries:</span>
+                <span>{cleanupResults.details.removedEntries}</span>
+              </div>
+              <div className="result-item">
+                <span>Removed Processed Records:</span>
+                <span>{cleanupResults.details.removedProcessedRecords}</span>
+              </div>
+              <div className="result-item">
+                <span>Removed Hashes:</span>
+                <span>{cleanupResults.details.removedHashes}</span>
+              </div>
+              <div className="result-item">
+                <span>Fixed Tags:</span>
+                <span>{cleanupResults.details.fixedTags}</span>
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
+
+      <div className="config-modal-controls">
+        <button type="button" onClick={onClose}>Close</button>
       </div>
     </div>
   );
@@ -34,15 +85,12 @@ export class DebugOperationsModal extends Modal {
   plugin: VisionRecallPlugin;
   root: any;
 
-  constructor(
-    app: any,
-    plugin: VisionRecallPlugin,
-  ) {
+  constructor(app: any, plugin: VisionRecallPlugin) {
     super(app);
     this.plugin = plugin;
   }
 
-  async onOpen() {
+  onOpen() {
     const { contentEl, titleEl } = this;
     titleEl.setText('Debug Operations');
 
