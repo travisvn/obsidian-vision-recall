@@ -1,31 +1,36 @@
-# ✨ Vision Recall: Your AI-Powered Screenshot Knowledge Base for Obsidian 🧠🖼️
+#  Vision Recall — Screenshot Knowledge Base for Obsidian
 
-[![GitHub Stars](https://img.shields.io/github/stars/travisvn/obsidian-vision-recall?style=social)](https://github.com/travisvn/obsidian-vision-recall)
-[![GitHub Issues](https://img.shields.io/github/issues/travisvn/obsidian-vision-recall)](https://github.com/travisvn/obsidian-vision-recall/issues)
-[![License: AGPL v3](https://img.shields.io/badge/License-AGPL%20v3-blue.svg)](https://www.gnu.org/licenses/agpl-3.0)
+<p align="center">
+	<a href="https://github.com/travisvn/obsidian-vision-recall">
+		<img src="https://img.shields.io/github/stars/travisvn/obsidian-vision-recall?style=social" alt="GitHub stars"></a>
+	<a href="https://tts.travisvn.com/obsidian" target="_blank">
+    <img src="https://img.shields.io/badge/dynamic/json?logo=obsidian&color=%23483699&label=downloads&query=%24%5B%27vision-recall%27%5D.downloads&url=https%3A%2F%2Fraw.githubusercontent.com%2Fobsidianmd%2Fobsidian-releases%2Fmaster%2Fcommunity-plugin-stats.json" alt="Obsidian downloads"></a>
+	<a href="https://github.com/travisvn/obsidian-vision-recall/releases">
+		<img src="https://img.shields.io/github/v/release/travisvn/obsidian-vision-recall" alt="GitHub release"></a>
+	<a href="https://github.com/travisvn/obsidian-vision-recall/issues">
+	  <img src="https://img.shields.io/github/issues/travisvn/obsidian-vision-recall" alt="GitHub issues"></a>
+	<img src="https://img.shields.io/github/last-commit/travisvn/obsidian-vision-recall?color=red" alt="GitHub last commit">
+	<img src="https://hits.seeyoufarm.com/api/count/incr/badge.svg?url=https%3A%2F%2Fgithub.com%2Ftravisvn%2Fobsidian-vision-recall&count_bg=%2379C83D&title_bg=%23555555&icon=&icon_color=%23E7E7E7&title=hits&edge_flat=false" alt="Hits">
+</p>
 
-**Turn Screenshots into Knowledge Gold with Vision Recall!** 🚀 Capture, process, and instantly recall information from your screenshots directly within Obsidian, powered by AI vision and language models.
-
-## ⚡️ Quick Elevator Pitch
-
-Vision Recall is an Obsidian plugin that automatically processes screenshots you take or import, using AI to extract text (OCR), analyze image content (Vision LLM), and generate insightful notes, all seamlessly integrated into your Obsidian vault. **Stop losing valuable information trapped in images – make your screenshots searchable, linkable, and knowledge-rich!**
+<h1 align="center">Screenshot anything you want to recall later. Let AI handle the rest.</h1>
 
  ![Obsidian Vision Recall Plugin Settings Screenshot](https://ud8v76kv5b.ufs.sh/f/1lHAtGEcemsO7dCunZWzwuZpH0xrBnPKXyVjUGi3taIWhoSk)
-
+ 
 ## ✨ Key Features that Supercharge Your Screenshot Workflow
 
 - **📸 Automatic Screenshot Intake:**
 
-  - 📥 **Intake Folder Monitoring:** Automatically process screenshots as soon as they are added to your designated intake folder. 📂
+  - 📂 **Intake Folder Monitoring:** Automatically process screenshots as soon as they are added to your designated intake folder. 
   - ⏱️ **Periodic & Auto-Processing:** Options for periodic intake folder checks or instant processing upon file creation.
-  - 🔗 **Deep Link Intake:** Capture screenshots directly via Obsidian deep links (for advanced workflows). 🔗
-  - 📋 **Clipboard Upload:** Quickly process screenshots directly from your clipboard. 📋
-  - 📤 **File Upload Modal:** Easily upload and process screenshots from files in your vault. 📤
+  - 🔗 **Deep Link Intake:** Capture screenshots directly via Obsidian deep links (for advanced workflows).
+  - 📋 **Clipboard Upload:** Quickly process screenshots directly from your clipboard.
+  - 📤 **File Upload Modal:** Easily upload and process screenshots from files in your vault.
 
 - **🧠 AI-Powered Screenshot Analysis:**
 
-  - 👓 **Optical Character Recognition (OCR):** Extract text from images with Tesseract OCR. 👓
-  - 👁️ **Vision LLM Integration:** Leverage powerful Vision Language Models (like OpenAI's GPT-4o or Ollama models) to analyze image content and understand the context. 👁️
+  - 👓 **Optical Character Recognition (OCR):** Extract text from images with Tesseract OCR. 
+  - 👁️ **Vision LLM Integration:** Leverage powerful Vision Language Models (like OpenAI's GPT-4o or Ollama models) to analyze image content and understand the context. 👁
   - 📝 **Intelligent Note Generation:** Automatically generate insightful Obsidian notes summarizing the key information from your screenshots, combining OCR text and vision analysis. 📝
   - 🏷️ **Smart Tagging:** AI-suggested tags automatically categorize your screenshots, making them easily searchable and linkable. 🏷️
 
