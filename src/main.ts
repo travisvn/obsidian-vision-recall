@@ -13,6 +13,7 @@ import { ProcessingQueueModal } from '@/components/modals/ProcessingQueueModal';
 import { saveBase64ImageInVault } from './lib/ingest';
 import { useQueueStore } from '@/stores/queueStore';
 import { customParse } from './lib/json-utils';
+import { DefaultConfig } from './types/config-types';
 
 export default class VisionRecallPlugin extends Plugin {
 	settings: VisionRecallPluginSettings;
@@ -88,7 +89,9 @@ export default class VisionRecallPlugin extends Plugin {
 			);
 
 			// Start polling after all initialization is complete
-			await this.dataManager.startIntakeDirectoryPolling();
+			if (await this.periodicProcessingEnabled()) {
+				await this.dataManager.startIntakeDirectoryPolling();
+			}
 
 			// Listen for unprocessed images after polling is started
 			this.dataManager.on('unprocessed-images-found', async () => {
@@ -266,12 +269,12 @@ export default class VisionRecallPlugin extends Plugin {
 
 	async autoProcessingEnabled(): Promise<boolean> {
 		const config = await this.dataManager.getConfig();
-		return config.enableAutoIntakeFolderProcessing || false;
+		return config.enableAutoIntakeFolderProcessing || DefaultConfig.enableAutoIntakeFolderProcessing;
 	}
 
 	async periodicProcessingEnabled(): Promise<boolean> {
 		const config = await this.dataManager.getConfig();
-		return config.enablePeriodicIntakeFolderProcessing || false;
+		return config.enablePeriodicIntakeFolderProcessing || DefaultConfig.enablePeriodicIntakeFolderProcessing;
 	}
 
 	async onFileCreated(plugin: VisionRecallPlugin, file: TAbstractFile) {
