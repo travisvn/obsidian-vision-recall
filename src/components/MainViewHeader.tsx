@@ -1,18 +1,16 @@
 import { useObsidianApp, usePlugin } from '@/context';
 import { FileUploadModal } from '@/components/modals/FileUploadModal';
 import { FolderSync, Info, LoaderPinwheel, Plus, RefreshCcw, Settings2, LayoutGrid, List, Bug, Maximize2, Hash, PencilRuler } from 'lucide-react';
-import { Notice, TFile } from 'obsidian';
-import React, { useEffect, useState } from 'react';
+import { Notice } from 'obsidian';
+import React from 'react';
 import { DocViewerModal } from '@/components/modals/DocViewerModal';
 import { ConfigModal } from '@/components/modals/ConfigModal';
 import { cn } from '@/lib/utils';
 import { useDataContext } from '@/data/DataContext';
 import { TestConfigModal } from './modals/TestConfigModal';
 import { ProcessingQueueModal } from './modals/ProcessingQueueModal';
-import { computeFileHash } from '@/lib/image-utils';
 import { useQueueStore } from '@/stores/queueStore';
 import { DebugOperationsModal } from './modals/DebugOperationsModal';
-import { IS_DEV } from '@/constants';
 
 interface MainViewHeaderProps {
   metadata: any[];
@@ -28,7 +26,7 @@ export const MainViewHeader = ({ metadata, refreshMetadata, viewMode = 'list', o
   const { status, actions } = useQueueStore();
 
   // const [showProcessing, setShowProcessing] = useState(false);
-  const [showMaximize, setShowMaximize] = useState(false);
+  // const [showMaximize, setShowMaximize] = useState(false);
 
   // useEffect(() => {
   //   if (status.isProcessing && status.minimized) {
@@ -38,13 +36,13 @@ export const MainViewHeader = ({ metadata, refreshMetadata, viewMode = 'list', o
   //   }
   // }, [status.isProcessing, status.minimized]);
 
-  useEffect(() => {
-    if (!status.maximized) {
-      setShowMaximize(true);
-    } else {
-      setShowMaximize(false);
-    }
-  }, [status.maximized]);
+  // useEffect(() => {
+  //   if (!status.maximized) {
+  //     setShowMaximize(true);
+  //   } else {
+  //     setShowMaximize(false);
+  //   }
+  // }, [status.maximized]);
 
   return (
     <>
@@ -194,7 +192,7 @@ export const MainViewHeader = ({ metadata, refreshMetadata, viewMode = 'list', o
               </div>
             </button>
           )}
-          {showMaximize && (
+          {/* {showMaximize && (
             <button
               aria-label='Maximize progress display'
               className='cursor-pointer flex flex-row items-center gap-2'
@@ -205,7 +203,7 @@ export const MainViewHeader = ({ metadata, refreshMetadata, viewMode = 'list', o
                 Maximize
               </div>
             </button>
-          )}
+          )} */}
 
           {/* Debug Modal */}
           {plugin.settings.debugMode && (
