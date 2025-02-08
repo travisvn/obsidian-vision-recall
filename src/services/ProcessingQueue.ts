@@ -72,7 +72,7 @@ export class ProcessingQueue extends Events {
           actions.updateItemStatus(item.file.path, success ? 'completed' : 'failed');
 
           if (success) {
-            await this.plugin.app.vault.delete(item.file);
+            await this.plugin.app.fileManager.trashFile(item.file);
           }
         } catch (error) {
           actions.updateItemStatus(item.file.path, 'failed', error.message);

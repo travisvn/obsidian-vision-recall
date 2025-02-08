@@ -31,12 +31,14 @@ export class ScreenshotModal extends Modal {
         await this.app.workspace.openLinkText(this.imagePath, '', true);
         this.close();
       });
-    }
 
-    // Create and append the image to the link
-    const imgEl = linkEl.createEl('img', { cls: 'screenshot-modal-image' });
-    const imageUrl = this.app.vault.getResourcePath(this.app.vault.getAbstractFileByPath(this.imagePath) as TFile);
-    imgEl.src = imageUrl;
+      // Create and append the image to the link
+      const imgEl = linkEl.createEl('img', { cls: 'screenshot-modal-image' });
+      const imageUrl = this.app.vault.getResourcePath(file);
+      imgEl.src = imageUrl;
+    } else {
+      console.error('File is not an instance of TFile:', file);
+    }
 
     // Append the link (containing the image) to the modal
     contentEl.appendChild(linkEl);

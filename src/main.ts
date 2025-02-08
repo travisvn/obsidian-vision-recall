@@ -211,7 +211,6 @@ export default class VisionRecallPlugin extends Plugin {
 
 
 	onunload() {
-		this.app.workspace.detachLeavesOfType(MAIN_VIEW_TYPE);
 		if (this.screenshotProcessor) {
 			this.screenshotProcessor.terminateWorker();
 		}

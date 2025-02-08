@@ -439,7 +439,7 @@ export class DataManager extends Events {
             if (dateMatch) {
               const backupFileDate = DateTime.fromFormat(dateMatch[1], 'yyyy-MM-dd');
               if (backupDate.diff(backupFileDate, 'days').days > backupRetentionDays) {
-                await this.plugin.app.vault.delete(backupFile);
+                await this.plugin.app.fileManager.trashFile(backupFile);
                 this.plugin.logger.info("deleted old backup file", backupFile.path);
               }
             }

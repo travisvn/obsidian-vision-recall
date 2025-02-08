@@ -35,7 +35,12 @@ export async function saveBase64ImageInVault(plugin: VisionRecallPlugin, base64:
     await adapter.writeBinary(filePath, buffer);
 
     // Return the saved file
-    return plugin.app.vault.getAbstractFileByPath(filePath) as TFile;
+    const file = plugin.app.vault.getAbstractFileByPath(filePath);
+    if (file instanceof TFile) {
+      return file;
+    } else {
+      return null;
+    }
   } catch (error) {
     plugin.logger.error("Error saving base64 image in vault:", error);
     return null;

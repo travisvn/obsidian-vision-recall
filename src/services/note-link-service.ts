@@ -73,15 +73,15 @@ export const openNoteWithTagOld = async (plugin: VisionRecallPlugin, tag: string
 
 export async function getNoteByUniqueTagOrCreateTag(plugin: VisionRecallPlugin, noteName: string, parentTagPrefix: string): Promise<TFile | null> {
   const { vault, metadataCache, workspace } = plugin.app;
-  let targetFile = vault.getAbstractFileByPath(`${noteName}.md`) as TFile;
+  let targetFile = vault.getAbstractFileByPath(`${noteName}.md`);
 
-  if (!targetFile) {
+  if (!targetFile || !(targetFile instanceof TFile)) {
     // If not found by name, try to find by unique nested tag using metadataCache
     // We need to generate the unique tag first to search for it
     const uniqueId = generateUniqueId();
     const fullUniqueTag = `#${parentTagPrefix}/${uniqueId}`;
     targetFile = await findNoteByUniqueTag(plugin, fullUniqueTag); // Pass the full unique tag
-    if (targetFile) {
+    if (targetFile && targetFile instanceof TFile) {
       return targetFile;
     } else {
       return null;
@@ -199,7 +199,12 @@ export const findNoteByTag = async (plugin: VisionRecallPlugin, tag: string): Pr
   }
   const file = await searchForFirstNoteWithContent(plugin, searchContent);
   if (file) {
-    return plugin.app.vault.getAbstractFileByPath(file) as TFile;
+    const filePath = plugin.app.vault.getAbstractFileByPath(file);
+    if (filePath instanceof TFile) {
+      return filePath;
+    } else {
+      return null;
+    }
   }
   return null;
 }
