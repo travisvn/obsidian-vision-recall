@@ -359,16 +359,19 @@ function extractJSONFromResponse(responseText: string): string {
 }
 
 function extractFlexibleJSONFromResponse(response: string): Record<string, any> | null {
-  // Step 1: Match a JSON block with or without backticks
+  // Step 1: Match a JSON block wrapped in backticks or a standalone JSON object
   const match = response.match(/```(?:json)?([\s\S]*?)```|{[\s\S]*}/);
   if (!match) return null;
 
   let jsonString = match[1] || match[0];
 
+  // Step 2: Cleanup strategies
   jsonString = jsonString
-    .replace(/'/g, '"') // Replace single quotes with double quotes
+    .replace(/\\"/g, '"') // Unescape quotes
+    .replace(/\\n/g, '')  // Remove literal '\n' characters
     .replace(/,\s*([}\]])/g, '$1') // Remove trailing commas
-    .replace(/(?<!")(\b\w+\b)(?=\s*:)/g, '"$1"'); // Add quotes around unquoted keys
+    .replace(/(?<!")(\b\w+\b)(?=\s*:)/g, '"$1"') // Add quotes around unquoted keys
+    .trim();
 
   try {
     return JSON.parse(jsonString);
