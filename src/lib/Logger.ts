@@ -1,17 +1,18 @@
 // import VisionRecallPlugin from '@/main';
 import { IS_DEV, PLUGIN_NAME } from '@/constants';
-import { VisionRecallPluginSettings } from '@/types/settings-types';
+import VisionRecallPlugin from '@/main';
+// import { VisionRecallPluginSettings } from '@/types/settings-types';
 
 export class PluginLogger {
-  // private plugin: VisionRecallPlugin;
-  settings: VisionRecallPluginSettings;
+  private plugin: VisionRecallPlugin;
+  // settings: VisionRecallPluginSettings;
 
-  constructor(settings: VisionRecallPluginSettings) {
-    this.settings = settings;
+  constructor(plugin: VisionRecallPlugin) {
+    this.plugin = plugin;
   }
 
   private shouldLog(): boolean {
-    return IS_DEV || this.settings.debugMode;
+    return IS_DEV || this.plugin.settings.debugMode;
   }
 
   info(...args: any[]): void {

@@ -93,8 +93,78 @@ export class DataManager extends Events {
     plugin.register(() => this.stopIntakeDirectoryPolling());
   }
 
-  /** Initialize and load user data, preserving other settings */
+  // Add a helper to check for valid config in the loaded data.
+  private isValidConfig(config: any): config is Config {
+    return config && typeof config === 'object';
+  }
+
+  // Initialize and load user data and config, NOT settings.
   async init() {
+    try {
+      const savedData = await this.plugin.loadData();
+      const parsedData = customParse(savedData) as StoredData;
+
+      // Initialize with default data structure
+      this.db.data = { ...DEFAULT_STORED_DATA };
+
+      // Carefully merge saved data with defaults
+      if (parsedData) {
+        // Merge userData
+        if (parsedData.userData) {
+          this.db.data.userData = {
+            list: Array.isArray(parsedData.userData.list) ? parsedData.userData.list : [],
+            map: typeof parsedData.userData.map === 'object' ? parsedData.userData.map : {}
+          };
+        }
+
+        // Merge config - only if the loaded config is valid!
+        if (this.isValidConfig(parsedData.config)) {
+          this.db.data.config = { ...DefaultConfig, ...parsedData.config };
+        }
+
+
+        // Merge sets and maps
+        if (parsedData.processedFileRecords) {
+          this.db.data.processedFileRecords = parsedData.processedFileRecords;
+        }
+
+        if (parsedData.processedHashes) {
+          this.db.data.processedHashes = new Set(Array.from(parsedData.processedHashes));
+        }
+
+        if (parsedData.availableTags) {
+          this.db.data.availableTags = new Set(Array.from(parsedData.availableTags));
+        }
+
+        if (parsedData.tagCounts) {
+          this.db.data.tagCounts = parsedData.tagCounts;
+        }
+
+        this.db.data.minimizedProgressDisplay = !!parsedData.minimizedProgressDisplay;
+      }
+
+      await this.db.write();
+      this.plugin.logger.info('DataManager initialized successfully');
+    } catch (error) {
+      this.plugin.logger.error('Failed to initialize DataManager:', error);
+      throw error; // Re-throw to be caught by the plugin's error handler
+    }
+  }
+
+
+  async updateConfig(updatedConfig: Partial<Config>) {
+    // Only update the 'config' part of the data.
+    this.db.data.config = {
+      ...this.db.data.config, // Existing config
+      ...updatedConfig,      // New config values (overwrites existing)
+    };
+    await this.persist();
+    this.trigger('config-updated'); // Emit config-updated event
+  }
+
+
+  /** Initialize and load user data, preserving other settings */
+  async initOLD() {
     try {
       const savedData = await this.plugin.loadData();
       const parsedData = customParse(savedData) as StoredData;
@@ -282,8 +352,20 @@ export class DataManager extends Events {
     await this.persist();
   }
 
-  /** Persist changes while preserving other settings */
+  // Persist changes while preserving other settings
   private async persist() {
+    // NO LONGER get settings from the plugin here.
+    const dataToPersist = {
+      ...this.db.data, // ALL data from DataManager
+      ...this.plugin.settings, // Merge in Obsidian settings.
+    };
+
+    await this.plugin.saveData(customStringify(dataToPersist)); // Save all data
+    this.trigger('data-updated');
+  }
+
+  /** Persist changes while preserving other settings */
+  private async persistOLD() {
     // Get current settings from the plugin
     const currentSettings = this.plugin.settings;
 
@@ -419,7 +501,7 @@ export class DataManager extends Events {
     return this.db.data.config || {};
   }
 
-  async updateConfig(updatedConfig: Partial<Config>) {
+  async updateConfigOLD(updatedConfig: Partial<Config>) {
     this.db.data.config = {
       ...this.db.data.config,
       ...updatedConfig

@@ -55,7 +55,7 @@ export default class MainView extends ItemView {
         <ObsidianAppContext.Provider value={this.app}>
           <PluginContext.Provider value={this.plugin}>
             <DataProvider dataManager={this.dataManager}>
-              <ProcessingDisplay />
+              {/* <ProcessingDisplay /> */}
               <ViewContainer initialMetadata={metadata} />
             </DataProvider>
           </PluginContext.Provider>

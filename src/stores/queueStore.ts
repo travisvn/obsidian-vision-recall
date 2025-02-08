@@ -75,11 +75,17 @@ export const useQueueStore = create<QueueStore>((set, get) => ({
     setMessage: (message) => set((state) => ({
       status: { ...state.status, message }
     })),
+    // toggleMinimized: () => set((state) => ({
+    //   status: { ...state.status, minimized: !state.status.minimized, maximized: false }
+    // })),
+    // toggleMaximized: () => set((state) => ({
+    //   status: { ...state.status, maximized: !state.status.maximized, minimized: false }
+    // })),
     toggleMinimized: () => set((state) => ({
-      status: { ...state.status, minimized: !state.status.minimized, maximized: false }
+      status: { ...state.status, minimized: !state.status.minimized }
     })),
     toggleMaximized: () => set((state) => ({
-      status: { ...state.status, maximized: !state.status.maximized, minimized: false }
+      status: { ...state.status, maximized: !state.status.maximized }
     })),
     stopProcessing: () => set((state) => ({
       status: { ...state.status, isStopped: true, isProcessing: false, isPaused: false }

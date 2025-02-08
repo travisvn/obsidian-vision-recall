@@ -27,16 +27,16 @@ export const MainViewHeader = ({ metadata, refreshMetadata, viewMode = 'list', o
   const dataManager = useDataContext();
   const { status, actions } = useQueueStore();
 
-  const [showProcessing, setShowProcessing] = useState(false);
+  // const [showProcessing, setShowProcessing] = useState(false);
   const [showMaximize, setShowMaximize] = useState(false);
 
-  useEffect(() => {
-    if (status.isProcessing && status.minimized) {
-      setShowProcessing(true);
-    } else {
-      setShowProcessing(false);
-    }
-  }, [status.isProcessing, status.minimized]);
+  // useEffect(() => {
+  //   if (status.isProcessing && status.minimized) {
+  //     setShowProcessing(true);
+  //   } else {
+  //     setShowProcessing(false);
+  //   }
+  // }, [status.isProcessing, status.minimized]);
 
   useEffect(() => {
     if (!status.maximized) {
@@ -161,7 +161,7 @@ export const MainViewHeader = ({ metadata, refreshMetadata, viewMode = 'list', o
         </div>
 
         <div className='flex flex-row gap-2'>
-          {showProcessing ? (
+          {status.isProcessing ? (
             <button
               aria-label='View processing queue'
               className='cursor-pointer flex flex-row items-center gap-2'

@@ -152,37 +152,46 @@ export async function llmSuggestTagsAndTitle(settings: VisionRecallPluginSetting
 
     console.log('LLM Response Text:', llmResponseText);
 
-    // Attempt Zod parsing first
     try {
-      const jsonString = extractJSONFromResponse(llmResponseText);
-      const parsedResponse = JSON.parse(jsonString);
-      const result = TagsSchema.safeParse(parsedResponse);
-
-      if (result.success) {
-        return {
-          tags: sanitizeTags(result.data.tags),
-          title: result.data.title.replace(/[\\"]/g, '').trim() || 'Untitled'
-        };
-      }
+      const { title, tags } = extractTitleAndTags(llmResponseText);
+      return {
+        tags: sanitizeTags(tags),
+        title: title || 'Untitled'
+      };
     } catch (e) {
       // JSON parse failed, fall through to legacy handling
+
+      try {
+        const jsonString = extractJSONFromResponse(llmResponseText);
+        const parsedResponse = JSON.parse(jsonString);
+        const result = TagsSchema.safeParse(parsedResponse);
+
+        if (result.success) {
+          return {
+            tags: sanitizeTags(result.data.tags),
+            title: result.data.title.replace(/[\\"]/g, '').trim() || 'Untitled'
+          };
+        }
+      } catch (e) {
+        // JSON parse failed, fall through to legacy handling
+      }
+
+      // Fallback handling for non-JSON responses or invalid schemas
+      let title = 'Untitled';
+      const titleMatch = llmResponseText.match(/"title":\s*"?(.*?)"?([,}]|$)/i) ||
+        llmResponseText.match(/title:\s*"?(.*?)"?([,}]|$)/i) ||
+        llmResponseText.match(/'title':\s*"?(.*?)"?([,}]|$)/i) ||
+        llmResponseText.match(/title:\s*(.*?)[,}]/i);
+
+      if (titleMatch) {
+        title = titleMatch[1].trim().replace(/[\\"]/g, '') || 'Untitled';
+      }
+
+      return {
+        tags: sanitizeTags(llmResponseText),
+        title: title.substring(0, 200) // Limit title length
+      };
     }
-
-    // Fallback handling for non-JSON responses or invalid schemas
-    let title = 'Untitled';
-    const titleMatch = llmResponseText.match(/"title":\s*"?(.*?)"?([,}]|$)/i) ||
-      llmResponseText.match(/title:\s*"?(.*?)"?([,}]|$)/i) ||
-      llmResponseText.match(/'title':\s*"?(.*?)"?([,}]|$)/i) ||
-      llmResponseText.match(/title:\s*(.*?)[,}]/i);
-
-    if (titleMatch) {
-      title = titleMatch[1].trim().replace(/[\\"]/g, '') || 'Untitled';
-    }
-
-    return {
-      tags: sanitizeTags(llmResponseText),
-      title: title.substring(0, 200) // Limit title length
-    };
   } catch (error) {
     console.error('LLM Tag Suggestion Error:', error);
     return DEFAULT_TAGS_AND_TITLE;
@@ -347,4 +356,37 @@ function extractJSONFromResponse(responseText: string): string {
     .replace(/\n/g, '');    // Remove newlines
 
   return jsonCandidate;
+}
+
+function extractFlexibleJSONFromResponse(response: string): Record<string, any> | null {
+  // Step 1: Match a JSON block with or without backticks
+  const match = response.match(/```(?:json)?([\s\S]*?)```|{[\s\S]*}/);
+  if (!match) return null;
+
+  let jsonString = match[1] || match[0];
+
+  jsonString = jsonString
+    .replace(/'/g, '"') // Replace single quotes with double quotes
+    .replace(/,\s*([}\]])/g, '$1') // Remove trailing commas
+    .replace(/(?<!")(\b\w+\b)(?=\s*:)/g, '"$1"'); // Add quotes around unquoted keys
+
+  try {
+    return JSON.parse(jsonString);
+  } catch (error) {
+    console.error('Failed to parse JSON after cleanup:', error);
+  }
+
+  return null;
+}
+
+function extractTitleAndTags(response: string): { title: string | null; tags: string[] } {
+  const parsedJSON = extractFlexibleJSONFromResponse(response);
+
+  if (parsedJSON && typeof parsedJSON === 'object') {
+    const title = typeof parsedJSON.title === 'string' ? parsedJSON.title : null;
+    const tags = Array.isArray(parsedJSON.tags) ? parsedJSON.tags.filter(tag => typeof tag === 'string') : [];
+    return { title, tags };
+  }
+
+  return { title: null, tags: [] };
 }

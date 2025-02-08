@@ -80,7 +80,7 @@ export class ScreenshotProcessor {
   plugin: VisionRecallPlugin;
   private worker: Worker | null = null;
   private progressManager: ProgressManager;
-  private logger: PluginLogger;
+  // private logger: PluginLogger;
 
   constructor(
     app: App,
@@ -89,7 +89,7 @@ export class ScreenshotProcessor {
   ) {
     this.app = app;
     this.plugin = plugin;
-    this.logger = plugin.logger;
+    // this.plugin.logger = plugin.logger;
     this.progressManager = new ProgressManager(plugin);
     // this.initializeWorker();
   }
@@ -101,9 +101,9 @@ export class ScreenshotProcessor {
   async initializeWorker() {
     try {
       this.worker = await createWorker();
-      this.logger.debug('Tesseract worker initialized.');
+      this.plugin.logger.debug('Tesseract worker initialized.');
     } catch (error) {
-      this.logger.error('Error initializing Tesseract worker:', error);
+      this.plugin.logger.error('Error initializing Tesseract worker:', error);
       new Notice('Failed to initialize OCR worker. See console for details.');
       this.worker = null;
     }
@@ -113,7 +113,7 @@ export class ScreenshotProcessor {
     if (this.worker) {
       await this.worker.terminate();
       this.worker = null;
-      this.logger.debug('Tesseract worker terminated.');
+      this.plugin.logger.debug('Tesseract worker terminated.');
     }
   }
 
@@ -131,11 +131,11 @@ export class ScreenshotProcessor {
     if (!this.plugin.settings.disableDuplicateFileCheck) {
       try {
         if (!(await shouldProcessImage(this.plugin, imageFile, true))) {
-          this.logger.debug(`Skipping screenshot: ${imageFile.path} — Duplicate or already processed.`);
+          this.plugin.logger.debug(`Skipping screenshot: ${imageFile.path} — Duplicate or already processed.`);
           return false;
         }
       } catch (error) {
-        this.logger.error('Error checking if image should be processed:', error);
+        this.plugin.logger.error('Error checking if image should be processed:', error);
         return false;
       }
     }
@@ -178,7 +178,7 @@ export class ScreenshotProcessor {
     if (this.progressManager.isStoppedByUser()) return null;
 
     const formattedTags = tagsToCommaString(formatTags(tagsAndTitle.tags));
-    this.logger.debug('Formatted Tags:', formattedTags);
+    this.plugin.logger.debug('Formatted Tags:', formattedTags);
 
     return {
       ocrText: validOCRText,
@@ -285,7 +285,7 @@ export class ScreenshotProcessor {
       );
       if (this.progressManager.isStoppedByUser()) return false;
 
-      this.logger.debug('Screenshot processing completed.');
+      this.plugin.logger.debug('Screenshot processing completed.');
       this.progressManager.endProgress(true);
 
       // Update metadata
@@ -295,7 +295,7 @@ export class ScreenshotProcessor {
       return returnSuccess ? true : undefined;
 
     } catch (error) {
-      this.logger.error('Error processing screenshot:', error);
+      this.plugin.logger.error('Error processing screenshot:', error);
       new Notice('Error processing screenshot. Please check console.');
       this.progressManager.endProgress(false);
       return returnSuccess ? false : undefined;
@@ -306,7 +306,7 @@ export class ScreenshotProcessor {
 
   private async performOCR(imageFile: TFile): Promise<string | null> {
     if (!this.worker) {
-      this.logger.warn('Tesseract worker not initialized. OCR will not be performed.');
+      this.plugin.logger.warn('Tesseract worker not initialized. OCR will not be performed.');
       new Notice('OCR worker is not ready.');
       return null;
     }
@@ -318,10 +318,10 @@ export class ScreenshotProcessor {
         imageBuffer as Tesseract.ImageLike
       );
       const ocrText = result.data.text;
-      this.logger.debug('OCR Text:', ocrText ? ocrText.substring(0, 100) + '...' : 'No text extracted');
+      this.plugin.logger.debug('OCR Text:', ocrText ? ocrText.substring(0, 100) + '...' : 'No text extracted');
       return ocrText;
     } catch (error) {
-      this.logger.error('OCR Error:', error);
+      this.plugin.logger.error('OCR Error:', error);
       new Notice('OCR processing failed. See console for details.');
       return null;
     }
@@ -353,11 +353,11 @@ export class ScreenshotProcessor {
         visionPayload
       );
 
-      this.logger.debug('Vision LLM Response:', visionLLMResponse ? visionLLMResponse.substring(0, 200) + '...' : 'API call failed or no response');
+      this.plugin.logger.debug('Vision LLM Response:', visionLLMResponse ? visionLLMResponse.substring(0, 200) + '...' : 'API call failed or no response');
       return visionLLMResponse;
 
     } catch (error) {
-      this.logger.error('Vision LLM API Error:', error);
+      this.plugin.logger.error('Vision LLM API Error:', error);
       new Notice('Vision LLM API call failed. See console for details.');
       return null;
     }
@@ -392,11 +392,11 @@ export class ScreenshotProcessor {
         endpointPayload
       );
 
-      this.logger.debug('Generated Notes:', generatedNotes ? generatedNotes.substring(0, 300) + '...' : 'API call failed or no notes generated');
+      this.plugin.logger.debug('Generated Notes:', generatedNotes ? generatedNotes.substring(0, 300) + '...' : 'API call failed or no notes generated');
       return generatedNotes;
 
     } catch (error) {
-      this.logger.error('Endpoint LLM API Error:', error);
+      this.plugin.logger.error('Endpoint LLM API Error:', error);
       new Notice('Endpoint LLM API call failed. See console for details.');
       return null;
     }
@@ -406,10 +406,10 @@ export class ScreenshotProcessor {
     try {
       if (this.progressManager.isStoppedByUser()) return DEFAULT_TAGS_AND_TITLE;
       const tagsAndTitle = await llmSuggestTagsAndTitle(this.settings, generatedNotes);
-      this.logger.debug('LLM Suggested Tags:', tagsAndTitle);
+      this.plugin.logger.debug('LLM Suggested Tags:', tagsAndTitle);
       return tagsAndTitle;
     } catch (error) {
-      this.logger.error('Tag Generation Error:', error);
+      this.plugin.logger.error('Tag Generation Error:', error);
       new Notice('Tag generation failed. See console for details.');
       return DEFAULT_TAGS_AND_TITLE;
     }
@@ -437,7 +437,7 @@ export class ScreenshotProcessor {
 
       return noteFileName.replace('.md', '');
     } catch (error) {
-      this.logger.error('Error generating note title:', error);
+      this.plugin.logger.error('Error generating note title:', error);
       new Notice('Error generating note title. See console for details.');
       return null;
     }
@@ -503,12 +503,12 @@ export class ScreenshotProcessor {
       if (this.progressManager.isStoppedByUser()) return null;
       // Write note file
       await this.app.vault.create(notePath, finalNoteContent);
-      this.logger.debug(`Obsidian note created: ${notePath}`);
+      this.plugin.logger.debug(`Obsidian note created: ${notePath}`);
       new Notice(`Note created: ${noteTitle}`);
 
       return { notePath, noteTitle };
     } catch (error) {
-      this.logger.error('Error creating Obsidian note:', error);
+      this.plugin.logger.error('Error creating Obsidian note:', error);
       new Notice('Error creating Obsidian note. See console for details.');
       return null;
     }
@@ -532,7 +532,7 @@ export class ScreenshotProcessor {
     try {
 
       await this.app.vault.copy(imageFile, newScreenshotPath);
-      this.logger.debug(`Screenshot saved to: ${newScreenshotPath}`);
+      this.plugin.logger.debug(`Screenshot saved to: ${newScreenshotPath}`);
 
       const hash = await computeFileHash(this.plugin, imageFile);
 
@@ -570,13 +570,13 @@ export class ScreenshotProcessor {
 
       if (this.progressManager.isStoppedByUser()) return;
       await this.app.vault.create(metadataPath, JSON.stringify(metadata, null, 2));
-      this.logger.debug(`Metadata saved to: ${metadataPath}`);
+      this.plugin.logger.debug(`Metadata saved to: ${metadataPath}`);
 
       // Update the metadata in the DataManager
       await this.plugin.dataManager.addOrUpdateEntry(dataStoreEntry);
 
     } catch (error) {
-      this.logger.error('Error saving screenshot or metadata:', error);
+      this.plugin.logger.error('Error saving screenshot or metadata:', error);
       new Notice('Error saving screenshot or metadata. See console for details.');
     }
   }
@@ -607,9 +607,9 @@ export class ScreenshotProcessor {
 
     if (metadataToDelete) {
       const currentMetadata = metadataToDelete;
-      this.logger.debug(`Current Metadata: ${JSON.stringify(currentMetadata, null, 2)}`);
+      this.plugin.logger.debug(`Current Metadata: ${JSON.stringify(currentMetadata, null, 2)}`);
 
-      this.logger.debug(`Deleting metadata for ${params.identity}`);
+      this.plugin.logger.debug(`Deleting metadata for ${params.identity}`);
       if (currentMetadata?.metadataPath) {
         await this.app.vault.adapter.trashLocal(currentMetadata.metadataPath);
       } else {
@@ -630,7 +630,7 @@ export class ScreenshotProcessor {
     try {
       await this.plugin.dataManager.addOrUpdateEntry(updatedMetadata);
     } catch (error) {
-      this.logger.error('Error updating screenshot metadata:', error);
+      this.plugin.logger.error('Error updating screenshot metadata:', error);
       new Notice('Failed to update screenshot metadata. See console for details.');
       throw error;
     }
@@ -681,7 +681,7 @@ export class ScreenshotProcessor {
 
       new Notice('Screenshot metadata updated successfully');
     } catch (error) {
-      this.logger.error('Error updating screenshot metadata:', error);
+      this.plugin.logger.error('Error updating screenshot metadata:', error);
       new Notice('Failed to update screenshot metadata. See console for details.');
       throw error;
     }
@@ -708,7 +708,7 @@ export class ScreenshotProcessor {
       const blob = await imageItem.getType(imageType);
       return { blob, type: imageType };
     } catch (error) {
-      this.logger.error('Error reading from clipboard:', error);
+      this.plugin.logger.error('Error reading from clipboard:', error);
       new Notice('Failed to read image from clipboard.');
       return null;
     }
@@ -729,7 +729,7 @@ export class ScreenshotProcessor {
 
       return await this.app.vault.createBinary(filePath, new Uint8Array(arrayBuffer));
     } catch (error) {
-      this.logger.error('Error saving image to vault:', error);
+      this.plugin.logger.error('Error saving image to vault:', error);
       new Notice('Failed to save image to vault.');
       return null;
     }
@@ -771,7 +771,7 @@ export class ScreenshotProcessor {
 
       if (!this.plugin.settings.disableDuplicateFileCheck) {
         if (!(await shouldProcessImage(this.plugin, file, true))) {
-          this.logger.debug(`Skipping screenshot: ${file.path} — Duplicate or already processed.`);
+          this.plugin.logger.debug(`Skipping screenshot: ${file.path} — Duplicate or already processed.`);
           return;
         }
       }
@@ -780,7 +780,7 @@ export class ScreenshotProcessor {
       this.plugin.processingQueue.addToQueue(file);
 
     } catch (error) {
-      this.logger.error('Error uploading and processing screenshot from clipboard:', error);
+      this.plugin.logger.error('Error uploading and processing screenshot from clipboard:', error);
       new Notice('Failed to upload and process screenshot from clipboard.');
     }
   }
