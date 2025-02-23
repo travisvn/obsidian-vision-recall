@@ -89,7 +89,7 @@ const GalleryView = (props: BaseViewProps) => {
                     onClick={() => openNote(item.notePath, item?.uniqueTag || item?.uniqueName || null)}
                     className="gallery-button"
                   >
-                    Open Note
+                    Open note
                   </button>
                   <div className="gallery-actions">
                     <span

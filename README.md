@@ -15,7 +15,7 @@
 
 <h1 align="center">Screenshot anything you want to recall later. Let AI handle the rest.</h1>
 
-![Obsidian Vision Recall Plugin Settings Screenshot](https://ud8v76kv5b.ufs.sh/f/1lHAtGEcemsOz28jKAJ0nP31wvubfTVZEFXeiGl29Rjtczhq)
+![Obsidian Vision Recall Plugin Settings Screenshot](https://ud8v76kv5b.ufs.sh/f/1lHAtGEcemsOcH9w1uftOS9iBHK5cjgGQCzkAJFWfLrwn6oI)
 
 ## Features
 
