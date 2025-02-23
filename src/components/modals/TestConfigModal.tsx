@@ -41,10 +41,10 @@ const TestConfigView: React.FC<TestConfigModalProps> = ({ dataManager, plugin, o
     <div className='flex flex-col gap-4 items-center justify-center'>
       <details className='w-full'>
         <summary
-          aria-label='Expand LLM Configuration'
+          aria-label='Expand LLM configuration'
           className='text-lg font-bold cursor-pointer text-center mx-auto'
         >
-          LLM Configuration
+          LLM configuration
         </summary>
         <div className="settings-display">
           <div className="setting-item">
@@ -53,28 +53,28 @@ const TestConfigView: React.FC<TestConfigModalProps> = ({ dataManager, plugin, o
           </div>
 
           <div className="setting-item">
-            <div className="setting-label">API Key:</div>
+            <div className="setting-label">API key:</div>
             <div className="setting-value">
               {settings.apiKey ? '********' : 'Not set'}
             </div>
           </div>
 
           <div className="setting-item">
-            <div className="setting-label">API Base URL:</div>
+            <div className="setting-label">API base URL:</div>
             <div className="setting-value">
               {settings.apiBaseUrl || 'Default'}
             </div>
           </div>
 
           <div className="setting-item">
-            <div className="setting-label">Vision Model:</div>
+            <div className="setting-label">Vision model:</div>
             <div className="setting-value">
               {settings.visionModelName}
             </div>
           </div>
 
           <div className="setting-item">
-            <div className="setting-label">Endpoint LLM Model:</div>
+            <div className="setting-label">Endpoint LLM model:</div>
             <div className="setting-value">
               {settings.endpointLlmModelName}
             </div>
@@ -88,7 +88,7 @@ const TestConfigView: React.FC<TestConfigModalProps> = ({ dataManager, plugin, o
           onClick={() => testConnection()}
           className='cursor-pointer'
         >
-          Test Connection — Retrieve Models
+          Test connection — Retrieve models
         </button>
       </div>
 
@@ -139,7 +139,7 @@ export class TestConfigModal extends Modal {
 
   onOpen() {
     const { contentEl, titleEl } = this;
-    titleEl.setText('Test Config');
+    titleEl.setText('Test config');
     const root = createRoot(contentEl);
 
     root.render(
@@ -156,13 +156,3 @@ export class TestConfigModal extends Modal {
     contentEl.empty();
   }
 }
-
-// Add some CSS styles
-// const styles = `
-
-// `;
-
-// // Add styles to document
-// const styleSheet = document.createElement('style');
-// styleSheet.innerText = styles;
-// document.head.appendChild(styleSheet); 

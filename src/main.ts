@@ -92,13 +92,13 @@ export default class VisionRecallPlugin extends Plugin {
 	private registerCommands() {
 		this.addCommand({
 			id: 'open-main-view',
-			name: 'Open Main View',
+			name: 'Open main view',
 			callback: async () => this.activateView()
 		});
 
 		this.addCommand({
 			id: 'export-user-data',
-			name: 'Export User Data',
+			name: 'Export user data',
 			callback: async () => {
 				try {
 					const blob = await this.dataManager.exportUserData();
@@ -120,7 +120,7 @@ export default class VisionRecallPlugin extends Plugin {
 
 		this.addCommand({
 			id: 'import-user-data',
-			name: 'Import User Data',
+			name: 'Import user data',
 			callback: async () => {
 				const input = document.createElement('input');
 				input.type = 'file';

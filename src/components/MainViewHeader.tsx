@@ -89,7 +89,7 @@ export const MainViewHeader = ({ metadata, refreshMetadata, viewMode = 'list', o
           >
             <Plus className='w-4 h-4' />
             <div className='hidden @3xl/header:block'>
-              Add New Screenshot
+              Add new screenshot
             </div>
           </button>
           <button
@@ -102,7 +102,7 @@ export const MainViewHeader = ({ metadata, refreshMetadata, viewMode = 'list', o
           >
             <FolderSync className='w-4 h-4' />
             <div className='hidden @3xl/header:block'>
-              Process Intake
+              Process intake
             </div>
           </button>
           <button
@@ -141,7 +141,7 @@ export const MainViewHeader = ({ metadata, refreshMetadata, viewMode = 'list', o
           </button>
 
           <button
-            aria-label='Test Config'
+            aria-label='Test config'
             className='cursor-pointer flex flex-row items-center gap-2'
             onClick={() => {
               new TestConfigModal(
@@ -153,7 +153,7 @@ export const MainViewHeader = ({ metadata, refreshMetadata, viewMode = 'list', o
           >
             <Bug className='w-4 h-4' />
             <div className='hidden @3xl/subheader:block'>
-              Test Config
+              Test config
             </div>
           </button>
         </div>
@@ -188,7 +188,7 @@ export const MainViewHeader = ({ metadata, refreshMetadata, viewMode = 'list', o
             >
               <LoaderPinwheel className='w-4 h-4' />
               <div className='hidden @4xl/subheader:block'>
-                Processing Queue
+                Processing queue
               </div>
             </button>
           )}
@@ -208,7 +208,7 @@ export const MainViewHeader = ({ metadata, refreshMetadata, viewMode = 'list', o
           {/* Debug Modal */}
           {plugin.settings.debugMode && (
             <button
-              aria-label='Debug Modal'
+              aria-label='Debug modal'
               className='cursor-pointer flex flex-row items-center gap-2'
               onClick={() => {
                 new DebugOperationsModal(app, plugin).open();
@@ -216,7 +216,7 @@ export const MainViewHeader = ({ metadata, refreshMetadata, viewMode = 'list', o
             >
               <PencilRuler className='w-4 h-4' />
               <div className='hidden @4xl/subheader:block'>
-                Debug Modal
+                Debug modal
               </div>
             </button>
           )}

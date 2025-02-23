@@ -14,13 +14,13 @@ const ViewMetadataForm: React.FC<ViewMetadataModalProps> = ({ metadata, onClose 
     <div className="view-metadata-modal select-text">
 
       <div className="metadata-section">
-        <h4>File Information</h4>
+        <h4>File information</h4>
         <div className="metadata-group">
-          <label>Screenshot Filename:</label>
+          <label>Screenshot filename:</label>
           <div className="metadata-value">{metadata.screenshotFilename}</div>
         </div>
         <div className="metadata-group">
-          <label>Note Path:</label>
+          <label>Note path:</label>
           <div className="metadata-value">{metadata.notePath}</div>
         </div>
         <div className="metadata-group">
@@ -32,22 +32,22 @@ const ViewMetadataForm: React.FC<ViewMetadataModalProps> = ({ metadata, onClose 
       </div>
 
       <div className="metadata-section">
-        <h4>Content Analysis</h4>
+        <h4>Content analysis</h4>
         {metadata.ocrText && (
           <div className="metadata-group">
-            <label>OCR Text:</label>
+            <label>OCR text:</label>
             <div className="metadata-value scrollable">{metadata.ocrText}</div>
           </div>
         )}
         {metadata.visionLLMResponse && (
           <div className="metadata-group">
-            <label>Vision Analysis:</label>
+            <label>Vision analysis:</label>
             <div className="metadata-value scrollable">{metadata.visionLLMResponse}</div>
           </div>
         )}
         {metadata.generatedNotes && (
           <div className="metadata-group">
-            <label>Generated Notes:</label>
+            <label>Generated notes:</label>
             <div className="metadata-value scrollable">{metadata.generatedNotes}</div>
           </div>
         )}
@@ -86,7 +86,7 @@ export class ViewMetadataModal extends Modal {
 
   onOpen() {
     const { contentEl, titleEl } = this;
-    titleEl.setText('Screenshot Details');
+    titleEl.setText('Screenshot details');
     const root = createRoot(contentEl);
 
     root.render(

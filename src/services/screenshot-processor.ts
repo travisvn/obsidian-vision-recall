@@ -178,7 +178,7 @@ export class ScreenshotProcessor {
     if (this.progressManager.isStoppedByUser()) return null;
 
     const formattedTags = tagsToCommaString(formatTags(tagsAndTitle.tags));
-    this.plugin.logger.debug('Formatted Tags:', formattedTags);
+    this.plugin.logger.debug('Formatted tags:', formattedTags);
 
     return {
       ocrText: validOCRText,
@@ -318,10 +318,10 @@ export class ScreenshotProcessor {
         imageBuffer as Tesseract.ImageLike
       );
       const ocrText = result.data.text;
-      this.plugin.logger.debug('OCR Text:', ocrText ? ocrText.substring(0, 100) + '...' : 'No text extracted');
+      this.plugin.logger.debug('OCR text:', ocrText ? ocrText.substring(0, 100) + '...' : 'No text extracted');
       return ocrText;
     } catch (error) {
-      this.plugin.logger.error('OCR Error:', error);
+      this.plugin.logger.error('OCR error:', error);
       new Notice('OCR processing failed. See console for details.');
       return null;
     }
@@ -353,11 +353,11 @@ export class ScreenshotProcessor {
         visionPayload
       );
 
-      this.plugin.logger.debug('Vision LLM Response:', visionLLMResponse ? visionLLMResponse.substring(0, 200) + '...' : 'API call failed or no response');
+      this.plugin.logger.debug('Vision LLM response:', visionLLMResponse ? visionLLMResponse.substring(0, 200) + '...' : 'API call failed or no response');
       return visionLLMResponse;
 
     } catch (error) {
-      this.plugin.logger.error('Vision LLM API Error:', error);
+      this.plugin.logger.error('Vision LLM API error:', error);
       new Notice('Vision LLM API call failed. See console for details.');
       return null;
     }
@@ -375,7 +375,7 @@ export class ScreenshotProcessor {
         endpointPrompt = visionLLMResponseCategoriesMap[visionLLMCategory];
       }
 
-      endpointPrompt += `\n\nOCR Text:\n${ocrText}\n\nVision Analysis:\n${visionLLMResponse}`
+      endpointPrompt += `\n\nOCR text:\n${ocrText}\n\nVision analysis:\n${visionLLMResponse}`
 
       const endpointPayload = {
         model: this.settings.endpointLlmModelName,
@@ -392,11 +392,11 @@ export class ScreenshotProcessor {
         endpointPayload
       );
 
-      this.plugin.logger.debug('Generated Notes:', generatedNotes ? generatedNotes.substring(0, 300) + '...' : 'API call failed or no notes generated');
+      this.plugin.logger.debug('Generated notes:', generatedNotes ? generatedNotes.substring(0, 300) + '...' : 'API call failed or no notes generated');
       return generatedNotes;
 
     } catch (error) {
-      this.plugin.logger.error('Endpoint LLM API Error:', error);
+      this.plugin.logger.error('Endpoint LLM API error:', error);
       new Notice('Endpoint LLM API call failed. See console for details.');
       return null;
     }
@@ -406,10 +406,10 @@ export class ScreenshotProcessor {
     try {
       if (this.progressManager.isStoppedByUser()) return DEFAULT_TAGS_AND_TITLE;
       const tagsAndTitle = await llmSuggestTagsAndTitle(this.settings, generatedNotes);
-      this.plugin.logger.debug('LLM Suggested Tags:', tagsAndTitle);
+      this.plugin.logger.debug('LLM suggested tags:', tagsAndTitle);
       return tagsAndTitle;
     } catch (error) {
-      this.plugin.logger.error('Tag Generation Error:', error);
+      this.plugin.logger.error('Tag generation error:', error);
       new Notice('Tag generation failed. See console for details.');
       return DEFAULT_TAGS_AND_TITLE;
     }
@@ -484,17 +484,17 @@ export class ScreenshotProcessor {
         : visionLLMResponse;
 
       const ocrTitle = this.settings.truncateOcrText > 0
-        ? `OCR Text (truncated to ${this.settings.truncateOcrText} characters)`
-        : 'OCR Text';
+        ? `OCR text (truncated to ${this.settings.truncateOcrText} characters)`
+        : 'OCR text';
 
       const visionTitle = this.settings.truncateVisionLLMResponse > 0
-        ? `Vision LLM Context (truncated to ${this.settings.truncateVisionLLMResponse} characters)`
-        : 'Vision LLM Context';
+        ? `Vision LLM context (truncated to ${this.settings.truncateVisionLLMResponse} characters)`
+        : 'Vision LLM context';
 
       // Main note content
-      const noteContent = `# Notes from Screenshot: ${noteTitleBase}\n\n${generatedNotes}`;
+      const noteContent = `# Notes from screenshot: ${noteTitleBase}\n\n${generatedNotes}`;
 
-      const metadataContent = `\n\n---\n*Screenshot Filename:* [[${newScreenshotPath}]]\n*${ocrTitle}*:\n\`\`\`\n${truncatedOcrText}...\n\`\`\`\n*${visionTitle}*:\n\`\`\`\n${truncatedVisionLLMResponse}...\n\`\`\`\n\n*Tags:* ${formattedTags}\n\n${linkingTag}\n`;
+      const metadataContent = `\n\n---\n*Screenshot filename:* [[${newScreenshotPath}]]\n*${ocrTitle}*:\n\`\`\`\n${truncatedOcrText}...\n\`\`\`\n*${visionTitle}*:\n\`\`\`\n${truncatedVisionLLMResponse}...\n\`\`\`\n\n*Tags:* ${formattedTags}\n\n${linkingTag}\n`;
 
       const finalNoteContent = this.settings.includeMetadataInNote
         ? `${noteContent}\n\n${metadataContent}`
@@ -667,8 +667,8 @@ export class ScreenshotProcessor {
           const titleAndNotes = updatedNoteContent.split('---')[0];
           const restOfContent = updatedNoteContent.split('---').slice(1).join('---');
           const updatedTitleAndNotes = titleAndNotes.replace(
-            /# Notes from Screenshot:.*?\n\n(.*?)\n\n/s,
-            `# Notes from Screenshot: ${updatedMetadata.noteTitle.replace('.md', '')}\n\n${updatedMetadata.generatedNotes}\n\n`
+            /# Notes from screenshot:.*?\n\n(.*?)\n\n/s,
+            `# Notes from screenshot: ${updatedMetadata.noteTitle.replace('.md', '')}\n\n${updatedMetadata.generatedNotes}\n\n`
           );
           const finalNoteContent = `${updatedTitleAndNotes}---${restOfContent}`;
 

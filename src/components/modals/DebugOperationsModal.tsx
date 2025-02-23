@@ -45,18 +45,18 @@ const DebugOperationsView = ({
           className="mod-warning cursor-pointer"
           onClick={handleDeleteAllEntries}
         >
-          Delete All Entries
+          Delete all entries
         </button>
         {deleteAllEntriesResults && (
           <div className="debug-results">
-            <h4>Delete All Entries Results</h4>
+            <h4>Delete all entries results</h4>
             <div className="results-details">
               <span>{deleteAllEntriesResults ? 'Success' : 'Failed'}</span>
             </div>
           </div>
         )}
         <div className="debug-section">
-          <h3>Database Maintenance</h3>
+          <h3>Database maintenance</h3>
           <div className="debug-description">
             Clean up the database by removing orphaned entries, recalculating tags, and performing other maintenance tasks.
           </div>
@@ -65,28 +65,28 @@ const DebugOperationsView = ({
             onClick={handleCleanup}
             disabled={isLoading}
           >
-            {isLoading ? 'Cleaning...' : 'Clean Database'}
+            {isLoading ? 'Cleaning...' : 'Clean database'}
           </button>
         </div>
 
         {cleanupResults && (
           <div className="debug-results">
-            <h4>Cleanup Results</h4>
+            <h4>Cleanup results</h4>
             <div className="results-details">
               <div className="result-item">
-                <span>Removed Entries:</span>
+                <span>Removed entries:</span>
                 <span>{cleanupResults.details.removedEntries}</span>
               </div>
               <div className="result-item">
-                <span>Removed Processed Records:</span>
+                <span>Removed processed records:</span>
                 <span>{cleanupResults.details.removedProcessedRecords}</span>
               </div>
               <div className="result-item">
-                <span>Removed Hashes:</span>
+                <span>Removed hashes:</span>
                 <span>{cleanupResults.details.removedHashes}</span>
               </div>
               <div className="result-item">
-                <span>Fixed Tags:</span>
+                <span>Fixed tags:</span>
                 <span>{cleanupResults.details.fixedTags}</span>
               </div>
             </div>
@@ -112,7 +112,7 @@ export class DebugOperationsModal extends Modal {
 
   onOpen() {
     const { contentEl, titleEl } = this;
-    titleEl.setText('Debug Operations');
+    titleEl.setText('Debug operations');
 
     this.root = createRoot(contentEl);
     this.root.render(

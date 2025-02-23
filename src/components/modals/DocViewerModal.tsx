@@ -57,7 +57,7 @@ const DocViewerForm: React.FC<DocViewerFormProps> = ({ docPath, onClose, app, pl
             setContent(fileContent);
           }}
         >
-          Ollama Setup
+          Ollama setup
         </button>
         <button
           type='button'
@@ -68,7 +68,7 @@ const DocViewerForm: React.FC<DocViewerFormProps> = ({ docPath, onClose, app, pl
             setContent(fileContent);
           }}
         >
-          Reference Guide
+          Reference guide
         </button>
       </div>
       {error && <div className="error-message">{error}</div>}

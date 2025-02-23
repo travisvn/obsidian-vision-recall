@@ -56,8 +56,8 @@ const GalleryView = (props: BaseViewProps) => {
             value={sortCriteria.column}
             onChange={(e) => handleSort(e.target.value)}
           >
-            <option value="timestamp">Date & Time</option>
-            <option value="screenshotFilename">Screenshot Filename</option>
+            <option value="timestamp">Date & time</option>
+            <option value="screenshotFilename">Screenshot filename</option>
             <option value="title">Title</option>
           </select>
           <button

@@ -16,7 +16,7 @@ export class ScreenshotModal extends Modal {
 
   onOpen() {
     const { contentEl } = this;
-    this.setTitle('Screenshot Preview');
+    this.setTitle('Screenshot preview');
 
     contentEl.addClass('screenshot-modal-content');
 

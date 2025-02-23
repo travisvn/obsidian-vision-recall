@@ -52,7 +52,7 @@ const ConfigModalContent = ({
               defaultChecked={config.enableAutoIntakeFolderProcessing || DefaultConfig.enableAutoIntakeFolderProcessing}
               onChange={e => updateConfig({ enableAutoIntakeFolderProcessing: e.target.checked })}
             />
-            Enable Auto Intake Folder Processing
+            Enable auto intake folder processing
           </label>
         </div>
 
@@ -63,13 +63,13 @@ const ConfigModalContent = ({
               defaultChecked={config.enablePeriodicIntakeFolderProcessing || DefaultConfig.enablePeriodicIntakeFolderProcessing}
               onChange={e => updateConfig({ enablePeriodicIntakeFolderProcessing: e.target.checked })}
             />
-            Enable Periodic Intake Folder Processing
+            Enable periodic intake folder processing
           </label>
         </div>
 
         <div className="config-field">
           <label>
-            Intake Folder Polling (seconds)
+            Intake folder polling (seconds)
           </label>
           <input
             type="number"
@@ -87,7 +87,7 @@ const ConfigModalContent = ({
               defaultChecked={config.enableAdvancedLogging || DefaultConfig.enableAdvancedLogging}
               onChange={e => updateConfig({ enableAdvancedLogging: e.target.checked })}
             />
-            Enable Advanced Logging
+            Enable advanced logging
           </label>
         </div>
 
@@ -99,14 +99,14 @@ const ConfigModalContent = ({
               defaultChecked={config.defaultMinimizedProgressDisplay || DefaultConfig.defaultMinimizedProgressDisplay}
               onChange={e => updateConfig({ defaultMinimizedProgressDisplay: e.target.checked })}
             />
-            Default Minimized Progress Display
+            Default minimized progress display
           </label>
         </div>
 
 
         <div className="config-modal-controls">
           <button type="submit" className="mod-cta cursor-pointer" disabled={!dirty}>
-            Save Changes
+            Save changes
           </button>
           <button type="button" className="mod-warning cursor-pointer" onClick={onClose}>
             Cancel
@@ -132,7 +132,7 @@ export class ConfigModal extends Modal {
 
   async onOpen() {
     const { contentEl, titleEl } = this;
-    titleEl.setText('Advanced Configuration');
+    titleEl.setText('Advanced configuration');
 
     this.root = createRoot(contentEl);
     this.root.render(

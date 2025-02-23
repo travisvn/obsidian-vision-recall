@@ -75,12 +75,12 @@ const FileUploadView = (props: FileUploadViewProps) => {
           onChange={handleFileChange}
         />
         <button className="upload-button" onClick={handleFileUpload}>
-          Process Screenshot from File
+          Process screenshot from file
         </button>
       </div>
       <div className="clipboard-upload-button-container">
         <button className="upload-button" onClick={handleClipboardUpload}>
-          Upload from Clipboard
+          Upload from clipboard
         </button>
       </div>
     </div>

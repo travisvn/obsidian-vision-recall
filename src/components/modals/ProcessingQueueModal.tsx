@@ -81,14 +81,14 @@ const QueueStatus: React.FC = () => {
       <div className="text-sm font-medium">
         {status.isProcessing ? (
           status.isPaused ? (
-            <span className="text-yellow-500">⏸ Processing Paused</span>
+            <span className="text-yellow-500">⏸ Processing paused</span>
           ) : (
-            <span className="text-green-500">▶ Processing Active</span>
+            <span className="text-green-500">▶ Processing active</span>
           )
         ) : status.queue.some(item => item.status === 'pending') ? (
-          <span className="text-muted">⏹ Processing Stopped</span>
+          <span className="text-muted">⏹ Processing stopped</span>
         ) : (
-          <span className="text-muted">Queue Empty</span>
+          <span className="text-muted">Queue empty</span>
         )}
       </div>
     </div>
@@ -162,7 +162,7 @@ export class ProcessingQueueModal extends Modal {
 
   onOpen() {
     const { contentEl, titleEl } = this;
-    titleEl.setText('Processing Queue');
+    titleEl.setText('Processing queue');
 
     this.root = createRoot(contentEl);
 

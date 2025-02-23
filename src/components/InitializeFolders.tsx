@@ -33,7 +33,7 @@ export const InitializeFolders = ({ foldersInitialized, setFoldersInitialized }:
         className='inline-flex items-center gap-2'
         onClick={runInitializeFolders}
       >
-        <FolderPlusIcon className='w-4 h-4' /> Initialize Folders
+        <FolderPlusIcon className='w-4 h-4' /> Initialize folders
       </button>
     </>
   );

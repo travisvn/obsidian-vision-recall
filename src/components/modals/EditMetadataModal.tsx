@@ -43,7 +43,7 @@ const EditMetadataForm: React.FC<EditMetadataModalProps> = ({ metadata, onSave, 
         </div>
 
         <div className="button-group">
-          <button type="submit">Save Changes</button>
+          <button type="submit">Save changes</button>
           <button type="button" onClick={onClose}>Cancel</button>
         </div>
       </form>
@@ -65,7 +65,7 @@ export class EditMetadataModal extends Modal {
 
   onOpen() {
     const { contentEl, titleEl } = this;
-    titleEl.setText('Edit Screenshot Metadata');
+    titleEl.setText('Edit screenshot metadata');
     const root = createRoot(contentEl);
 
     const handleSave = async (updatedMetadata: any) => {

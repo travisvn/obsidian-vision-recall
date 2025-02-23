@@ -70,11 +70,11 @@ const ListView = (props: BaseViewProps) => {
             Note {sortCriteria.column === 'title' && (sortCriteria.direction === 'asc' ? '▲' : '▼')}
           </strong>
           <strong
-            aria-label='Sort by timestamp'
+            aria-label='Sort by date & time'
             onClick={() => handleSort('timestamp')}
             style={{ cursor: 'pointer' }}
           >
-            Date & Time {sortCriteria.column === 'timestamp' && (sortCriteria.direction === 'asc' ? '▲' : '▼')}
+            Date & time {sortCriteria.column === 'timestamp' && (sortCriteria.direction === 'asc' ? '▲' : '▼')}
           </strong>
           <strong>Tags</strong>
           <strong>Actions</strong>
