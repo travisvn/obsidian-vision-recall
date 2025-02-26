@@ -11,7 +11,15 @@ export default defineConfig(async ({ mode }) => {
     plugins: [react()],
     resolve: {
       alias: {
-        "@": path.resolve(__dirname, "./src"),
+        "@": path.resolve(__dirname, "./src")
+      },
+    },
+    css: {
+      preprocessorOptions: {
+        scss: {
+          // You can add global Sass variables here if needed
+          // additionalData: `@import "@/styles/variables.scss";`,
+        },
       },
     },
     build: {

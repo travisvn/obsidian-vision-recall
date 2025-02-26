@@ -11,7 +11,7 @@ interface ViewMetadataModalProps {
 
 const ViewMetadataForm: React.FC<ViewMetadataModalProps> = ({ metadata, onClose }) => {
   return (
-    <div className="view-metadata-modal select-text">
+    <div className="vr view-metadata-modal select-text">
 
       <div className="metadata-section">
         <h4>File information</h4>

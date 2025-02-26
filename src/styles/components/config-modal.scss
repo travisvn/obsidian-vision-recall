@@ -1,0 +1,115 @@
+.vr {
+  .config-modal-form {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    padding: 1rem;
+  }
+
+  .config-field {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    gap: 0.5rem;
+    /* padding: 0.5rem 0; */
+    padding-bottom: 1rem;
+    border-bottom: 1px solid var(--background-modifier-border);
+  }
+
+  .config-field label {
+    font-weight: 500;
+    /* margin-bottom: 0.25rem; */
+  }
+
+  .config-field-checkbox-label {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 0.5rem;
+    cursor: pointer;
+  }
+
+  .config-field input[type='text'],
+  .config-field input[type='number'],
+  .config-field select {
+    padding: 0.5rem;
+    border-radius: 4px;
+    border: 1px solid var(--background-modifier-border);
+    background: var(--background-primary);
+    color: var(--text-normal);
+  }
+
+  .config-multiselect {
+    height: 100px;
+    padding: 0.5rem;
+  }
+
+  .config-modal-controls {
+    display: flex;
+    gap: 1rem;
+    justify-content: flex-end;
+    /* padding: 1rem 0; */
+    margin-top: 1rem;
+  }
+
+  /* Debug Operations Modal Styles */
+  .debug-operations-content {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    padding: 1rem;
+  }
+
+  .debug-section {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    padding: 1rem;
+    background-color: var(--background-secondary);
+    border-radius: 8px;
+  }
+
+  .debug-section h3 {
+    margin: 0;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid var(--background-modifier-border);
+  }
+
+  .debug-description {
+    color: var(--text-muted);
+    font-size: 0.9em;
+    line-height: 1.4;
+  }
+
+  .debug-results {
+    padding: 1rem;
+    background-color: var(--background-secondary);
+    border-radius: 8px;
+  }
+
+  .debug-results h4 {
+    margin: 0;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid var(--background-modifier-border);
+  }
+
+  .results-details {
+    margin-top: 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .result-item {
+    display: flex;
+    justify-content: space-between;
+    padding: 0.5rem;
+    background-color: var(--background-primary);
+    border-radius: 4px;
+  }
+
+  .result-item span:first-child {
+    color: var(--text-muted);
+  }
+}

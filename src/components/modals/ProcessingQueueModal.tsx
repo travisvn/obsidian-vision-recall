@@ -23,7 +23,7 @@ const QueueControls: React.FC = () => {
   };
 
   return (
-    <div className="queue-controls flex flex-row items-center gap-2 mb-4 mx-auto justify-center">
+    <div className="vr queue-controls flex flex-row items-center gap-2 mb-4 mx-auto justify-center">
       {shouldShowControls ? (
         <>
           {status.isProcessing ? (
@@ -77,8 +77,8 @@ const QueueStatus: React.FC = () => {
   const { status } = useQueueStore();
 
   return (
-    <div className="queue-status mb-4 mx-auto justify-center">
-      <div className="text-sm font-medium">
+    <div className="vr queue-status mb-4 mx-auto justify-center w-full">
+      <div className="text-sm font-medium text-center">
         {status.isProcessing ? (
           status.isPaused ? (
             <span className="text-yellow-500">⏸ Processing paused</span>
@@ -104,7 +104,7 @@ const ProcessingQueueView: React.FC = () => {
   }, []);
 
   return (
-    <div className="processing-queue-modal w-full">
+    <div className="vr processing-queue-modal w-full">
 
       <div className="queue-stats flex flex-row items-center justify-between gap-1 w-full mb-4 p-2 bg-secondary rounded">
         <div>Total: {status.queue.length}</div>

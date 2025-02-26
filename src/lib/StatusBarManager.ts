@@ -58,7 +58,7 @@ export class StatusBarManager {
     }
 
     this.setStatusBarIcon(queueIndicator, icon);
-    setTooltip(this.statusBarProcessingQueueEl, 'Processing Queue', { placement: 'top' });
+    setTooltip(this.statusBarProcessingQueueEl, 'Processing queue', { placement: 'top' });
     queueIndicator.onclick = () => this.plugin.openProcessingQueueModal();
 
     if (isProcessing && !isPaused) {

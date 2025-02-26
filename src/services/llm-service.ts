@@ -1,6 +1,7 @@
 import { OPENROUTER_HEADERS } from '@/constants';
 import { tagsJsonSchema, TagsSchema } from '@/lib/tag-utils';
 import { VisionRecallPluginSettings } from '@/types/settings-types';
+import { requestUrl, RequestUrlParam, RequestUrlResponse } from 'obsidian';
 
 export const VISION_LLM_PROMPT = "Analyze this screenshot and describe its content and identify the type of screenshot if possible.";
 
@@ -40,18 +41,22 @@ export async function callLLMAPI(
   }
 
   try {
-    const response = await fetch(`${baseUrl}${apiEndpoint}`, {
+    const request: RequestUrlParam = {
+      url: `${baseUrl}${apiEndpoint}`,
       method: 'POST',
       headers: headers,
       body: JSON.stringify(payload),
-    });
+    };
 
-    if (!response.ok) {
-      console.error(`LLM API Error: ${response.status} ${response.statusText}`);
+    const response: RequestUrlResponse = await requestUrl(request);
+
+    if (response.status !== 200) {
+      console.error(`LLM API Error: ${response.status}`);
       return null;
     }
 
-    const data = await response.json();
+    // const data = await response.json();
+    const data = response.json;
 
     if (settings.llmProvider === 'openai' || settings.llmProvider === 'ollama') {
       return data?.choices?.[0]?.message?.content || null;
@@ -150,8 +155,6 @@ export async function llmSuggestTagsAndTitle(settings: VisionRecallPluginSetting
       return DEFAULT_TAGS_AND_TITLE;
     }
 
-    console.log('LLM Response Text:', llmResponseText);
-
     try {
       const { title, tags } = extractTitleAndTags(llmResponseText);
       return {
@@ -218,17 +221,20 @@ export async function fetchLLMAPIGet(
   }
 
   try {
-    const response = await fetch(`${baseUrl}${apiEndpoint}`, {
+    const request: RequestUrlParam = {
+      url: `${baseUrl}${apiEndpoint}`,
       method: 'GET',
       headers: headers,
-    });
+    };
 
-    if (!response.ok) {
-      console.error(`LLM API Error: ${response.status} ${response.statusText}`);
+    const response = await requestUrl(request);
+
+    if (response.status !== 200) {
+      console.error(`LLM API Error: ${response.status}`);
       return null;
     }
 
-    const data = await response.json();
+    const data = response.json;
 
     return data;
   } catch (error) {
@@ -267,13 +273,13 @@ type OllamaApiResponse = {
 async function fetchOllamaModels(endpointUrl: string): Promise<OllamaModel[]> {
   try {
     let endpoint = adjustEndpoint(endpointUrl, true)
-    const response = await fetch(`${endpoint}/api/tags`);
+    const response = await requestUrl(`${endpoint}/api/tags`);
 
-    if (!response.ok) {
-      throw new Error(`Failed to fetch models: ${response.status} ${response.statusText}`);
+    if (response.status !== 200) {
+      throw new Error(`Failed to fetch models: ${response.status}`);
     }
 
-    const data: OllamaApiResponse = await response.json();
+    const data: OllamaApiResponse = response.json;
     return data.models;
   } catch (error) {
     console.error("Error fetching Ollama models:", error);
@@ -301,18 +307,21 @@ type OpenAIModelsResponse = {
 async function fetchOpenAIModels(endpointUrl: string, apiKey: string): Promise<OpenAIModel[]> {
   try {
     let endpoint = adjustEndpoint(endpointUrl, true)
-    const response = await fetch(`${endpoint}/v1/models`, {
+    const request: RequestUrlParam = {
+      url: `${endpoint}/v1/models`,
       headers: {
         'Authorization': `Bearer ${apiKey}`,
         'Content-Type': 'application/json'
       }
-    });
+    };
 
-    if (!response.ok) {
-      throw new Error(`Failed to fetch models: ${response.status} ${response.statusText}`);
+    const response = await requestUrl(request);
+
+    if (response.status !== 200) {
+      throw new Error(`Failed to fetch models: ${response.status}`);
     }
 
-    const data: OpenAIModelsResponse = await response.json();
+    const data: OpenAIModelsResponse = response.json;
     return data.data;
   } catch (error) {
     console.error("Error fetching OpenAI models:", error);

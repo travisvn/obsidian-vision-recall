@@ -1,38 +1,48 @@
-import { App, MarkdownRenderer, Modal } from 'obsidian';
+import { App, MarkdownRenderer, Modal, requestUrl } from 'obsidian';
 import React, { useEffect, useRef, useState } from 'react';
 import { createRoot } from 'react-dom/client';
 import VisionRecallPlugin from '@/main';
 
 interface DocViewerFormProps {
-  docPath: string;
   onClose: () => void;
   app: App;
   plugin: VisionRecallPlugin;
 }
 
-const DOC_PATHS = {
-  OLLAMA_SETUP: 'ollama-setup.md',
-  REFERENCE_GUIDE: 'reference.md',
+const DOC_LOCATIONS = {
+  'ollama-setup': 'https://raw.githubusercontent.com/travisvn/obsidian-vision-recall/main/docs/ollama-setup.md',
+  'reference-guide': 'https://raw.githubusercontent.com/travisvn/obsidian-vision-recall/main/docs/reference.md',
 }
 
-const DocViewerForm: React.FC<DocViewerFormProps> = ({ docPath, onClose, app, plugin }) => {
+const DocViewerForm: React.FC<DocViewerFormProps> = ({ onClose, app, plugin }) => {
   const containerRef = useRef<HTMLDivElement>(null);
+  const [selectedDoc, setSelectedDoc] = useState<string>('ollama-setup');
   const [content, setContent] = useState<string>('');
   const [error, setError] = useState<string>('');
 
-  useEffect(() => {
-    const loadDocument = async () => {
-      try {
-        const fileContent = await app.vault.adapter.read(docPath);
-        setContent(fileContent);
-      } catch (err) {
-        console.error('Error loading document:', err);
-        setError('Failed to load document');
+  const fetchContent = async (url: string) => {
+    try {
+      // const response = await fetch(url);
+      const response = await requestUrl(url);
+      if (response.status !== 200) {
+        throw new Error(`HTTP error! status: ${response.status}`);
       }
-    };
+      const text = response.text;
+      return text;
+    } catch (error) {
+      console.error('Error fetching content:', error);
+      setError('Failed to fetch content');
+      return '';
+    }
+  }
 
-    loadDocument();
-  }, [docPath, app.vault]);
+  useEffect(() => {
+    const fetchContentEffect = async () => {
+      const content = await fetchContent(DOC_LOCATIONS[selectedDoc]);
+      setContent(content);
+    }
+    fetchContentEffect();
+  }, [selectedDoc]);
 
   useEffect(() => {
     if (!containerRef.current || !content) return;
@@ -46,15 +56,13 @@ const DocViewerForm: React.FC<DocViewerFormProps> = ({ docPath, onClose, app, pl
   }, [content, app, plugin]);
 
   return (
-    <div className="doc-viewer-modal">
+    <div className="vr doc-viewer-modal">
       <div className='flex flex-row gap-2 justify-center items-center'>
         <button
           type='button'
           className='cursor-pointer'
           onClick={async () => {
-            const newDocPath = `${plugin.manifest.dir}/docs/${DOC_PATHS.OLLAMA_SETUP}`;
-            const fileContent = await app.vault.adapter.read(newDocPath);
-            setContent(fileContent);
+            setSelectedDoc('ollama-setup');
           }}
         >
           Ollama setup
@@ -63,9 +71,7 @@ const DocViewerForm: React.FC<DocViewerFormProps> = ({ docPath, onClose, app, pl
           type='button'
           className='cursor-pointer'
           onClick={async () => {
-            const newDocPath = `${plugin.manifest.dir}/docs/${DOC_PATHS.REFERENCE_GUIDE}`;
-            const fileContent = await app.vault.adapter.read(newDocPath);
-            setContent(fileContent);
+            setSelectedDoc('reference-guide');
           }}
         >
           Reference guide
@@ -81,13 +87,11 @@ const DocViewerForm: React.FC<DocViewerFormProps> = ({ docPath, onClose, app, pl
 };
 
 export class DocViewerModal extends Modal {
-  private docPath: string;
   private plugin: VisionRecallPlugin;
 
-  constructor(app: App, plugin: VisionRecallPlugin, docName: string) {
+  constructor(app: App, plugin: VisionRecallPlugin) {
     super(app);
     this.plugin = plugin;
-    this.docPath = `${plugin.manifest.dir}/docs/${docName}.md`;
   }
 
   onOpen() {
@@ -97,7 +101,6 @@ export class DocViewerModal extends Modal {
 
     root.render(
       <DocViewerForm
-        docPath={this.docPath}
         onClose={() => this.close()}
         app={this.app}
         plugin={this.plugin}

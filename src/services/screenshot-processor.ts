@@ -1,4 +1,4 @@
-import { App, Notice, TFile, TFolder, normalizePath } from 'obsidian';
+import { App, FileManager, Notice, TFile, TFolder, normalizePath } from 'obsidian';
 import Tesseract, { createWorker, Worker } from 'tesseract.js';
 import { VisionRecallPluginSettings } from '@/types/settings-types';
 import { DEFAULT_TAGS_AND_TITLE, TagsAndTitle, VISION_LLM_PROMPT, callLLMAPI, llmSuggestTagsAndTitle } from '@/services/llm-service';
@@ -196,8 +196,9 @@ export class ScreenshotProcessor {
     newScreenshotPath: string;
   }> {
     const screenshotStorageFolder = normalizePath(await this.plugin.getFolderFromSettingsKey('screenshotStorageFolderPath'));
-    if (!await this.app.vault.adapter.exists(screenshotStorageFolder)) {
-      await this.app.vault.adapter.mkdir(screenshotStorageFolder);
+    const screenshotStorageFolderExists = this.app.vault.getFolderByPath(screenshotStorageFolder);
+    if (!screenshotStorageFolderExists) {
+      await this.app.vault.createFolder(screenshotStorageFolder);
     }
 
     // const timestamp = Date.now();
@@ -611,17 +612,26 @@ export class ScreenshotProcessor {
 
       this.plugin.logger.debug(`Deleting metadata for ${params.identity}`);
       if (currentMetadata?.metadataPath) {
-        await this.app.vault.adapter.trashLocal(currentMetadata.metadataPath);
+        const metadataFile = this.app.vault.getAbstractFileByPath(currentMetadata.metadataPath);
+        if (metadataFile instanceof TFile) {
+          await this.app.fileManager.trashFile(metadataFile);
+        }
       } else {
         const screenshotFilename = currentMetadata.screenshotFilename.split('.').slice(0, -1).join('.');
         const metadataFilename = `${screenshotFilename}.json`;
 
         const metadataPath = normalizePath(`${screenshotStorageFolder}/${metadataFilename}`);
-        await this.app.vault.adapter.trashLocal(metadataPath);
+        const metadataFile = this.app.vault.getAbstractFileByPath(metadataPath);
+        if (metadataFile instanceof TFile) {
+          await this.app.fileManager.trashFile(metadataFile);
+        }
       }
 
       if (currentMetadata?.screenshotStoragePath) {
-        await this.app.vault.adapter.trashLocal(currentMetadata.screenshotStoragePath);
+        const screenshotFile = this.app.vault.getAbstractFileByPath(currentMetadata.screenshotStoragePath);
+        if (screenshotFile instanceof TFile) {
+          await this.app.fileManager.trashFile(screenshotFile);
+        }
       }
     }
   }
@@ -654,30 +664,34 @@ export class ScreenshotProcessor {
       if (updatedMetadata.notePath) {
         const noteFile = this.app.vault.getAbstractFileByPath(updatedMetadata.notePath);
         if (noteFile instanceof TFile) {
-          const currentNoteContent = await this.app.vault.read(noteFile);
+          this.app.vault.process(noteFile, (data: string) => {
+            const currentNoteContent = data;
 
-          // Replace the tags section in the note
-          const formattedTags = tagsToCommaString(formatTags(updatedMetadata.extractedTags));
-          const updatedNoteContent = currentNoteContent.replace(
-            /\*Tags:\*.*/,
-            `*Tags:* ${formattedTags}`
-          );
+            // Replace the tags section in the note
+            const formattedTags = tagsToCommaString(formatTags(updatedMetadata.extractedTags));
+            const updatedNoteContent = currentNoteContent.replace(
+              /\*Tags:\*.*/,
+              `*Tags:* ${formattedTags}`
+            );
 
-          // Replace the notes section (everything between the title and the first ---)
-          const titleAndNotes = updatedNoteContent.split('---')[0];
-          const restOfContent = updatedNoteContent.split('---').slice(1).join('---');
-          const updatedTitleAndNotes = titleAndNotes.replace(
-            /# Notes from screenshot:.*?\n\n(.*?)\n\n/s,
-            `# Notes from screenshot: ${updatedMetadata.noteTitle.replace('.md', '')}\n\n${updatedMetadata.generatedNotes}\n\n`
-          );
-          const finalNoteContent = `${updatedTitleAndNotes}---${restOfContent}`;
+            // Replace the notes section (everything between the title and the first ---)
+            const titleAndNotes = updatedNoteContent.split('---')[0];
+            const restOfContent = updatedNoteContent.split('---').slice(1).join('---');
+            const updatedTitleAndNotes = titleAndNotes.replace(
+              /# Notes from screenshot:.*?\n\n(.*?)\n\n/s,
+              `# Notes from screenshot: ${updatedMetadata.noteTitle.replace('.md', '')}\n\n${updatedMetadata.generatedNotes}\n\n`
+            );
+            const finalNoteContent = `${updatedTitleAndNotes}---${restOfContent}`;
 
-          await this.app.vault.modify(noteFile, finalNoteContent);
+            return finalNoteContent;
+          });
         }
       }
 
       // Save the updated metadata to the JSON file
-      await this.app.vault.modify(file, JSON.stringify(updatedMetadata, null, 2));
+      this.app.vault.process(file, (data: string) => {
+        return JSON.stringify(updatedMetadata, null, 2);
+      });
 
       new Notice('Screenshot metadata updated successfully');
     } catch (error) {
@@ -720,8 +734,9 @@ export class ScreenshotProcessor {
       const extension = type.split('/')[1];
       const fileName = `clipboard-image-${timestamp}.${extension}`;
 
-      if (!await this.app.vault.adapter.exists(folderPath)) {
-        await this.app.vault.adapter.mkdir(folderPath);
+      const screenshotStorageFolder = this.app.vault.getFolderByPath(folderPath);
+      if (!screenshotStorageFolder) {
+        await this.app.vault.createFolder(folderPath);
       }
 
       const filePath = normalizePath(`${folderPath}/${fileName}`);
@@ -786,7 +801,10 @@ export class ScreenshotProcessor {
   }
 
   async deleteFile(filePath: string) {
-    await this.app.vault.adapter.trashLocal(filePath);
+    const fileToDelete = this.app.vault.getAbstractFileByPath(filePath);
+    if (fileToDelete instanceof TFile) {
+      await this.app.fileManager.trashFile(fileToDelete);
+    }
   }
 
   async processIntakeFolderAuto() {

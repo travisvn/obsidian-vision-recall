@@ -1,0 +1,43 @@
+.vr-edit-metadata-modal {
+  padding: 20px;
+}
+
+.vr-edit-metadata-modal h3 {
+  margin-bottom: 20px;
+}
+
+.vr-edit-metadata-modal .form-group {
+  margin-bottom: 15px;
+}
+
+.vr-edit-metadata-modal label {
+  display: block;
+  margin-bottom: 5px;
+  font-weight: 500;
+}
+
+.vr-edit-metadata-modal input,
+.vr-edit-metadata-modal textarea {
+  width: 100%;
+  padding: 8px;
+  border: 1px solid var(--background-modifier-border);
+  border-radius: 4px;
+}
+
+.vr-edit-metadata-modal .button-group {
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
+  margin-top: 20px;
+}
+
+.vr-edit-metadata-modal button {
+  padding: 8px 16px;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.vr-edit-metadata-modal button[type='submit'] {
+  background-color: var(--interactive-accent);
+  color: var(--text-on-accent);
+}

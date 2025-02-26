@@ -39,7 +39,7 @@ const DebugOperationsView = ({
   };
 
   return (
-    <div className="config-modal-container">
+    <div className="vr config-modal-container">
       <div className="debug-operations-content">
         <button
           className="mod-warning cursor-pointer"

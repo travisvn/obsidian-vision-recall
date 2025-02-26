@@ -19,7 +19,7 @@ export const InitializeFolders = ({ foldersInitialized, setFoldersInitialized }:
     if (success) {
       setFoldersInitialized(true);
 
-      localStorage.setItem(STORAGE_KEYS.INITIALIZE_FOLDERS, 'true');
+      plugin.app.saveLocalStorage(STORAGE_KEYS.INITIALIZE_FOLDERS, 'true');
     }
   }
 

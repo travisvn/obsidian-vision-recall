@@ -19,7 +19,7 @@ const ConfigModalContent = ({
   useEffect(() => {
     if (initialized) return;
     const loadConfig = async () => {
-      const currentConfig = await dataManager.getConfig();
+      const currentConfig = dataManager.getConfig();
       setConfig(currentConfig);
       setInitialized(true);
     };
@@ -42,7 +42,7 @@ const ConfigModalContent = ({
   }
 
   return (
-    <div className="config-modal-container">
+    <div className="vr config-modal-container">
       <form onSubmit={handleSubmit} className="config-modal-form">
 
         <div className="config-field">

@@ -4,7 +4,7 @@ import { PLUGIN_ICON, PLUGIN_NAME } from '@/constants';
 import ScreenshotKBSettingTab from '@/settings/SettingsPage';
 import { VisionRecallPluginSettings, DEFAULT_SETTINGS } from '@/types/settings-types';
 import { ScreenshotProcessor } from '@/services/screenshot-processor';
-import "@/styles/global.css";
+import "@/styles/global.scss";
 import { DataManager, StoredData } from './data/DataManager';
 import { PluginLogger } from '@/lib/Logger';
 import { shouldProcessImage } from '@/lib/image-utils';
@@ -15,6 +15,7 @@ import { useQueueStore } from '@/stores/queueStore';
 import { StatusBarManager } from './lib/StatusBarManager';
 import { debounce } from 'obsidian';
 import { customParse } from './lib/json-utils';
+import { DefaultConfig } from './types/config-types';
 
 export default class VisionRecallPlugin extends Plugin {
 	settings: VisionRecallPluginSettings;
@@ -37,12 +38,11 @@ export default class VisionRecallPlugin extends Plugin {
 			this.processingQueue = new ProcessingQueue(this, useQueueStore);
 			this.statusBarManager = new StatusBarManager(this);
 
-			this.initializeProcessing();
 			this.initializeUI();
-			this.registerEventListeners();
+			await this.registerEventListeners();
 			this.registerCommands();
 			this.registerProtocolHandler();
-			await this.startBackgroundProcesses();
+			await this.loadScreenshotMetadata();
 			this.logger.info('Plugin loaded successfully');
 
 		} catch (error) {
@@ -51,13 +51,8 @@ export default class VisionRecallPlugin extends Plugin {
 		}
 	}
 
-	// ... (rest of the methods, as before, BUT WITH CHANGES BELOW) ...
 	private async initializeDataManagement() {
 		await this.dataManager.init();
-	}
-
-	private initializeProcessing() {
-		// Nothing specific to do here now.
 	}
 
 	private initializeUI() {
@@ -75,14 +70,32 @@ export default class VisionRecallPlugin extends Plugin {
 		});
 	}
 
-
-	private registerEventListeners() {
+	private async registerEventListeners() {
 		// Debounce the file creation handler
 		this.debouncedOnCreateHandler = debounce(this.onFileCreated.bind(this), 500, true);
 
 		this.registerEvent(
 			this.app.vault.on('create', this.debouncedOnCreateHandler)
 		);
+
+		if (await this.periodicProcessingEnabled()) {
+			const config = this.dataManager.getConfig();
+			// consider intakeFolderPollingInterval as seconds (so convert to ms)
+			const interval = (config.intakeFolderPollingInterval || DefaultConfig.intakeFolderPollingInterval) * 1000;
+
+
+			if (interval < 30000) {
+				this.logger.warn('DataManager: Intake folder polling interval is less than 30 seconds. This is not recommended.');
+				return;
+			}
+
+			this.registerEvent(
+				window.setInterval(
+					() => this.screenshotProcessor.processIntakeFolderAuto(),
+					interval
+				)
+			)
+		}
 
 		this.dataManager.on('unprocessed-images-found', async () => {
 			await this.screenshotProcessor.processIntakeFolderAuto();
@@ -93,7 +106,7 @@ export default class VisionRecallPlugin extends Plugin {
 		this.addCommand({
 			id: 'open-main-view',
 			name: 'Open main view',
-			callback: async () => this.activateView()
+			callback: async () => this.openView()
 		});
 
 		this.addCommand({
@@ -164,31 +177,18 @@ export default class VisionRecallPlugin extends Plugin {
 		});
 	}
 
-	private async startBackgroundProcesses() {
-		await this.loadScreenshotMetadata();
-
-		this.registerInterval(
-			window.setInterval(() => this.logger.debug('Interval check'), 5 * 60 * 1000)
-		);
-
-		if (await this.periodicProcessingEnabled()) {
-			await this.dataManager.startIntakeDirectoryPolling();
-		}
-	}
-
-
 	openProcessingQueueModal() {
 		const modal = new ProcessingQueueModal({ app: this.app, plugin: this });
 		modal.open();
 	}
 
 	async autoProcessingEnabled(): Promise<boolean> {
-		const config = await this.dataManager.getConfig();
+		const config = this.dataManager.getConfig();
 		return config.enableAutoIntakeFolderProcessing;
 	}
 
 	async periodicProcessingEnabled(): Promise<boolean> {
-		const config = await this.dataManager.getConfig();
+		const config = this.dataManager.getConfig();
 		return config.enablePeriodicIntakeFolderProcessing;
 	}
 
@@ -208,7 +208,6 @@ export default class VisionRecallPlugin extends Plugin {
 			this.logger.info(`Skipping already processed image: ${file.path}`);
 		}
 	}
-
 
 	onunload() {
 		if (this.screenshotProcessor) {
@@ -232,33 +231,6 @@ export default class VisionRecallPlugin extends Plugin {
 			active: true,
 		});
 	}
-
-
-	async activateView() {
-		this.app.workspace.detachLeavesOfType(MAIN_VIEW_TYPE);
-		await this.app.workspace.getLeaf(true).setViewState({
-			type: MAIN_VIEW_TYPE,
-			active: true,
-		});
-
-		this.app.workspace.revealLeaf(
-			this.app.workspace.getLeavesOfType(MAIN_VIEW_TYPE)[0]
-		);
-	}
-
-	toggleView() {
-		const leaves = this.app.workspace.getLeavesOfType(MAIN_VIEW_TYPE);
-		if (leaves.length > 0) {
-			this.deactivateView();
-		} else {
-			this.openView();
-		}
-	}
-
-	async deactivateView() {
-		this.app.workspace.detachLeavesOfType(MAIN_VIEW_TYPE);
-	}
-
 
 	async loadSettings() {
 		const loadedData = await this.loadData();
@@ -290,7 +262,6 @@ export default class VisionRecallPlugin extends Plugin {
 		await this.saveData(mergedData);
 	}
 
-
 	async loadScreenshotMetadata(): Promise<void> {
 		this.metadata = this.dataManager.getAllEntries();
 	}
@@ -317,7 +288,7 @@ export default class VisionRecallPlugin extends Plugin {
 			for (const child of children) {
 				if (child instanceof TFile && child.extension === 'json') {
 					try {
-						const metadataContent = await this.app.vault.read(child);
+						const metadataContent = await this.app.vault.cachedRead(child);
 						const metadata = JSON.parse(metadataContent);
 						metadataArray.push(metadata);
 						metadata?.extractedTags?.forEach(tag => {

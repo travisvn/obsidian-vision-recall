@@ -1,4 +1,5 @@
 import VisionRecallPlugin from '@/main';
+import { normalizePath } from 'obsidian';
 
 export async function initializeFolders(plugin: VisionRecallPlugin) {
   try {
@@ -30,10 +31,16 @@ export async function initializeFolders(plugin: VisionRecallPlugin) {
   }
 }
 
+/**
+ * Sanitizes a filename by replacing problematic characters with an empty string
+ *  This is used in addition to normalizePath() (which is used 20+ times in this project)
+ * @param input - The filename to sanitize
+ * @returns The sanitized filename
+ */
 export function sanitizeFilename(input: string): string {
   // Define a regex pattern to match problematic filename characters
   const forbiddenChars = /[<>:"\/\\|?*\x00-\x1F]/g
 
   // Replace them with an empty string
-  return input.replace(forbiddenChars, '')
+  return normalizePath(input.replace(forbiddenChars, ''))
 }

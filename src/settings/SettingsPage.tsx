@@ -28,20 +28,23 @@ export default class VisionRecallSettingTab extends PluginSettingTab {
         .onChange(async (value: 'openai' | 'ollama') => {
           this.plugin.settings.llmProvider = value;
           await this.plugin.saveSettings();
+          this.display();
         })
       );
 
-    new Setting(containerEl)
-      .setName('API key')
-      .setDesc('OpenAI API key (not needed for Ollama).')
-      .addText(text => text
-        .setPlaceholder('Enter your API key')
-        .setValue(this.plugin.settings.apiKey)
-        .onChange(async (value) => {
-          this.plugin.settings.apiKey = value;
-          await this.plugin.saveSettings();
-        })
-      );
+    if (this.plugin.settings.llmProvider != 'ollama') {
+      new Setting(containerEl)
+        .setName('API key')
+        .setDesc('OpenAI API key (not needed for Ollama).')
+        .addText(text => text
+          .setPlaceholder('Enter your API key')
+          .setValue(this.plugin.settings.apiKey)
+          .onChange(async (value) => {
+            this.plugin.settings.apiKey = value;
+            await this.plugin.saveSettings();
+          })
+        );
+    }
 
     new Setting(containerEl)
       .setName('API base URL')
@@ -89,20 +92,23 @@ export default class VisionRecallSettingTab extends PluginSettingTab {
         .onChange(async (value) => {
           this.plugin.settings.useParentFolder = value;
           await this.plugin.saveSettings();
+          this.display();
         })
       );
 
-    new Setting(containerEl)
-      .setName('Parent folder path')
-      .setDesc('Path to the parent folder. Optional if not using parent folder organization.')
-      .addText(text => text
-        .setPlaceholder('e.g., VisionRecall')
-        .setValue(this.plugin.settings.parentFolderPath)
-        .onChange(async (value) => {
-          this.plugin.settings.parentFolderPath = value;
-          await this.plugin.saveSettings();
-        })
-      );
+    if (this.plugin.settings.useParentFolder) {
+      new Setting(containerEl)
+        .setName('Parent folder path')
+        .setDesc('Path to the parent folder. Optional if not using parent folder organization.')
+        .addText(text => text
+          .setPlaceholder('e.g., VisionRecall')
+          .setValue(this.plugin.settings.parentFolderPath)
+          .onChange(async (value) => {
+            this.plugin.settings.parentFolderPath = value;
+            await this.plugin.saveSettings();
+          })
+        );
+    }
 
     new Setting(containerEl)
       .setName('Add prefix to folder names')
@@ -112,20 +118,23 @@ export default class VisionRecallSettingTab extends PluginSettingTab {
         .onChange(async (value) => {
           this.plugin.settings.addPrefixToFolderNames = value;
           await this.plugin.saveSettings();
+          this.display();
         })
       );
 
-    new Setting(containerEl)
-      .setName('Prefix to add to folder names')
-      .setDesc('Prefix for folder names. Optional.')
-      .addText(text => text
-        .setPlaceholder('e.g., VisionRecall-')
-        .setValue(this.plugin.settings.prefixToAddToFolderNames)
-        .onChange(async (value) => {
-          this.plugin.settings.prefixToAddToFolderNames = value;
-          await this.plugin.saveSettings();
-        })
-      );
+    if (this.plugin.settings.addPrefixToFolderNames) {
+      new Setting(containerEl)
+        .setName('Prefix to add to folder names')
+        .setDesc('Prefix for folder names. Optional.')
+        .addText(text => text
+          .setPlaceholder('e.g., VisionRecall-')
+          .setValue(this.plugin.settings.prefixToAddToFolderNames)
+          .onChange(async (value) => {
+            this.plugin.settings.prefixToAddToFolderNames = value;
+            await this.plugin.saveSettings();
+          })
+        );
+    }
 
     new Setting(containerEl)
       .setName('Screenshot storage folder')

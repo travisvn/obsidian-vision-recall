@@ -1,42 +1,45 @@
-@import './components/processing-display.css';
-@import './components/edit-metadata-modal.css';
-@import './components/loaders.css';
-@import './components/view-metadata-modal.css';
-@import './components/config-modal.css';
-@import './components/processing-queue.css';
-@import './components/tag-combobox.css';
+@use './components/processing-display.scss';
+@use './components/edit-metadata-modal.scss';
+@use './components/loaders.scss';
+@use './components/view-metadata-modal.scss';
+@use './components/config-modal.scss';
+@use './components/processing-queue.scss';
+@use './components/tag-combobox.scss';
+@use './components/delete-confirmation-modal.scss';
 @tailwind base;
 
 @layer base {
-  :root {
+  .vision-recall-styling {
     --dialog-width: calc(min(auto, 100%));
     --dialog-height: calc(min(auto, 100%));
   }
 
-  .settings-display {
-    padding: 1rem;
-    width: 100%;
-    max-width: 500px;
-  }
+  .vision-recall-styling {
+    .settings-display {
+      padding: 1rem;
+      width: 100%;
+      max-width: 500px;
+    }
 
-  .setting-item {
-    display: flex;
-    justify-content: space-between;
-    padding: 0.5rem 0;
-    border-bottom: 1px solid var(--background-modifier-border);
-  }
+    .setting-item {
+      display: flex;
+      justify-content: space-between;
+      padding: 0.5rem 0;
+      border-bottom: 1px solid var(--background-modifier-border);
+    }
 
-  .setting-item:last-child {
-    border-bottom: none;
-  }
+    .setting-item:last-child {
+      border-bottom: none;
+    }
 
-  .setting-label {
-    font-weight: bold;
-    color: var(--text-muted);
-  }
+    .setting-label {
+      font-weight: bold;
+      color: var(--text-muted);
+    }
 
-  .setting-value {
-    color: var(--text-normal);
+    .setting-value {
+      color: var(--text-normal);
+    }
   }
 
   .button-group {
@@ -96,7 +99,7 @@
     color: var(--interactive-accent);
   }
 
-  .loader {
+  .vr-loader {
     border: 4px solid rgba(0, 0, 0, 0.1);
     border-left-color: #000;
     border-radius: 50%;
@@ -125,9 +128,9 @@
     margin-top: 40px;
   }
 
-  .settings-header {
+  /* .settings-header {
     margin-top: 40px;
-  }
+  } */
 
   .vision-recall-view {
     padding-right: 20px;

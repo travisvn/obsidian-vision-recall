@@ -38,7 +38,7 @@ const TestConfigView: React.FC<TestConfigModalProps> = ({ dataManager, plugin, o
   };
 
   return (
-    <div className='flex flex-col gap-4 items-center justify-center'>
+    <div className='flex flex-col gap-4 items-center justify-center vision-recall-styling'>
       <details className='w-full'>
         <summary
           aria-label='Expand LLM configuration'

@@ -66,7 +66,7 @@ const FileUploadView = (props: FileUploadViewProps) => {
   };
 
   return (
-    <div className="file-upload-modal-content">
+    <div className="vr file-upload-modal-content">
       <div className="file-upload-container">
         <input
           type="file"

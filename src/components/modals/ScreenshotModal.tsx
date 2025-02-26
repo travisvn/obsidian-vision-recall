@@ -21,7 +21,7 @@ export class ScreenshotModal extends Modal {
     contentEl.addClass('screenshot-modal-content');
 
     // Create a link element
-    const linkEl = contentEl.createEl('a', { cls: 'screenshot-modal-link' });
+    const linkEl = contentEl.createEl('a', { cls: 'vr screenshot-modal-link' });
 
     // Set the link to open the image in Obsidian
     const file = this.app.vault.getAbstractFileByPath(this.imagePath);

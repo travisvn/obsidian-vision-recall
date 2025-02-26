@@ -46,7 +46,7 @@ export default class MainView extends ItemView {
     const metadata = this.plugin.dataManager.getAllEntries();
 
     // Create wrapper div for React
-    const reactContainer = container.createDiv();
+    const reactContainer = container.createDiv({ cls: 'vision-recall-styling' });
 
     // Create React root and render app
     this.root = createRoot(reactContainer);
@@ -76,7 +76,7 @@ const ViewContainer = ({ initialMetadata }) => {
 
   const [viewMode, setViewMode] = React.useState<'list' | 'gallery'>(() => {
     try {
-      const saved = localStorage.getItem('vision-recall-view-mode');
+      const saved = plugin.app.loadLocalStorage('vision-recall-view-mode');
       return saved === 'gallery' ? 'gallery' : 'list';
     } catch {
       // return 'list';
@@ -87,7 +87,7 @@ const ViewContainer = ({ initialMetadata }) => {
   const handleViewModeChange = (mode: 'list' | 'gallery') => {
     setViewMode(mode);
     try {
-      localStorage.setItem('vision-recall-view-mode', mode);
+      plugin.app.saveLocalStorage('vision-recall-view-mode', mode);
     } catch (e) {
       plugin.logger.error('Failed to save view mode preference:', e);
     }

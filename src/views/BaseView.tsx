@@ -7,6 +7,7 @@ import { useDataContext } from '@/data/DataContext';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { STORAGE_KEYS, DEFAULT_ITEMS_PER_PAGE } from '@/constants';
 import TagCombobox from '@/components/ui/tag-combobox';
+import { App } from 'obsidian';
 
 export interface BaseViewProps {
   initialMetadata: any[];
@@ -54,7 +55,7 @@ export const useBaseView = ({ initialMetadata, viewMode, onViewModeChange }: Bas
 
   const [filteredMetadata, setFilteredMetadata] = useState([]);
   const [foldersInitialized, setFoldersInitialized] = useState<boolean>(() => {
-    const saved = localStorage.getItem('vision-recall-initialize-folders');
+    const saved = app.loadLocalStorage('vision-recall-initialize-folders');
     return saved ? saved === 'true' : false;
   });
 
@@ -81,7 +82,7 @@ export const useBaseView = ({ initialMetadata, viewMode, onViewModeChange }: Bas
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(() => {
     try {
-      const saved = localStorage.getItem(STORAGE_KEYS.ITEMS_PER_PAGE);
+      const saved = app.loadLocalStorage(STORAGE_KEYS.ITEMS_PER_PAGE);
       const parsed = saved ? Number(saved) : DEFAULT_ITEMS_PER_PAGE;
       return isNaN(parsed) ? DEFAULT_ITEMS_PER_PAGE : parsed;
     } catch (e) {
@@ -92,7 +93,7 @@ export const useBaseView = ({ initialMetadata, viewMode, onViewModeChange }: Bas
 
   const [sortCriteria, setSortCriteria] = useState<SortCriteria>(() => {
     try {
-      const saved = localStorage.getItem(STORAGE_KEYS.SORT_CRITERIA);
+      const saved = app.loadLocalStorage(STORAGE_KEYS.SORT_CRITERIA);
       const parsed = saved ? JSON.parse(saved) : {
         column: 'timestamp',
         direction: 'desc'
@@ -115,7 +116,7 @@ export const useBaseView = ({ initialMetadata, viewMode, onViewModeChange }: Bas
         direction: sortCriteria.column === columnName && sortCriteria.direction === 'asc' ? 'desc' : 'asc', // Toggle direction if same column is clicked
       } as SortCriteria;
       setSortCriteria(newSortCriteria);
-      localStorage.setItem(STORAGE_KEYS.SORT_CRITERIA, JSON.stringify(newSortCriteria));
+      app.saveLocalStorage(STORAGE_KEYS.SORT_CRITERIA, JSON.stringify(newSortCriteria));
     } catch (e) {
       console.warn('Failed to save sort criteria:', e);
     }
@@ -256,7 +257,7 @@ export const useBaseView = ({ initialMetadata, viewMode, onViewModeChange }: Bas
     try {
       setItemsPerPage(newValue);
       setCurrentPage(1);
-      localStorage.setItem(STORAGE_KEYS.ITEMS_PER_PAGE, newValue.toString());
+      app.saveLocalStorage(STORAGE_KEYS.ITEMS_PER_PAGE, newValue.toString());
     } catch (e) {
       console.warn('Failed to save items per page preference:', e);
     }

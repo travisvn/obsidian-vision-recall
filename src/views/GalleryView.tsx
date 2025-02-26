@@ -8,6 +8,7 @@ import { MainViewHeader } from '@/components/MainViewHeader';
 import { ViewMetadataModal } from '../components/modals/ViewMetadataModal';
 import { openNoteWithTag } from '@/services/note-link-service';
 import { BaseViewProps, useBaseView } from './BaseView';
+import { DeleteConfirmationModal } from '@/components/modals/DeleteConfirmationModal';
 
 const GalleryView = (props: BaseViewProps) => {
   const {
@@ -122,15 +123,20 @@ const GalleryView = (props: BaseViewProps) => {
                     <span
                       aria-label="Delete screenshot"
                       className="w-5 h-5 cursor-pointer"
-                      onClick={async () => {
-                        const shouldDelete = window.confirm('Are you sure you want to delete this screenshot and its metadata?');
-                        if (shouldDelete) {
+                      onClick={() => {
+                        const modal = new DeleteConfirmationModal(app, plugin, 'Are you sure you want to delete this screenshot and its metadata?', async () => {
                           await plugin.screenshotProcessor.deleteScreenshotMetadata({
                             identity: item.id,
                             identityType: 'id'
                           });
                           await refreshMetadata();
-                        }
+                          // modal.close();
+                        },
+                          () => {
+                            modal.close();
+                          }
+                        );
+                        modal.open();
                       }}
                     >
                       <Trash2 />
@@ -156,7 +162,7 @@ const GalleryView = (props: BaseViewProps) => {
                 {DateTime.fromISO(item.timestamp).toFormat('yyyy/MM/dd HH:mm')}
               </div>
               <div className="gallery-tags">
-                {item.extractedTags ? item.extractedTags.join(', ') : 'No Tags'}
+                {item.extractedTags ? item.extractedTags.join(', ') : 'No tags'}
               </div>
             </div>
           </div>

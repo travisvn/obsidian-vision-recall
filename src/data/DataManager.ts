@@ -1,7 +1,7 @@
 import VisionRecallPlugin from '@/main';
 import { Low, Memory } from 'lowdb';
 import { DateTime } from 'luxon';
-import { Events, normalizePath } from 'obsidian';
+import { Events, normalizePath, TFile } from 'obsidian';
 import { Config, DefaultConfig } from '@/types/config-types';
 import { ProcessedFileRecord } from '@/types/processing-types';
 import { customParse, customStringify } from '@/lib/json-utils';
@@ -82,15 +82,11 @@ const DEFAULT_STORED_DATA: StoredData = {
 export class DataManager extends Events {
   private db: Low<StoredData>;
   plugin: VisionRecallPlugin;
-  private pollIntervalId: number | null = null;
 
   constructor(plugin: VisionRecallPlugin) {
     super();
     this.plugin = plugin;
     this.db = new Low(new Memory(), DEFAULT_STORED_DATA);
-
-    // Cleanup interval when plugin unloads
-    plugin.register(() => this.stopIntakeDirectoryPolling());
   }
 
   // Add a helper to check for valid config in the loaded data.
@@ -164,6 +160,7 @@ export class DataManager extends Events {
 
 
   /** Initialize and load user data, preserving other settings */
+  /** Keeping for posterity sake as the application needs change */
   async initOLD() {
     try {
       const savedData = await this.plugin.loadData();
@@ -420,7 +417,7 @@ export class DataManager extends Events {
 
         // Only create a new backup if one doesn't exist for today
         if (!this.plugin.app.vault.getAbstractFileByPath(newLocationForExistingFile)) {
-          const currentFileContent = await this.plugin.app.vault.read(file);
+          const currentFileContent = await this.plugin.app.vault.cachedRead(file);
           await this.plugin.app.vault.create(newLocationForExistingFile, currentFileContent);
           this.plugin.logger.info("created new backup file", newLocationForExistingFile);
 
@@ -446,7 +443,9 @@ export class DataManager extends Events {
           }
         }
 
-        await this.plugin.app.vault.modify(file, dataStr);
+        this.plugin.app.vault.process(file, (data: string) => {
+          return dataStr;
+        });
         this.plugin.logger.info("modified existing file", file.path);
       }
     }
@@ -477,14 +476,6 @@ export class DataManager extends Events {
   async importUserData(jsonData: string) {
     try {
       const parsedData = customParse(jsonData) as StoredData;
-
-      // Ensure the imported data has the right structure
-      // if (!parsedData || typeof parsedData !== 'object' || !Array.isArray(parsedData.userData.list) || typeof parsedData.userData.map !== 'object') {
-      //   throw new Error('Invalid userData format.');
-      // }
-
-      // Merge new user data with the existing database
-      // this.db.data.userData = parsedData.userData;
       this.db.data = parsedData;
       await this.persist();
     } catch (error) {
@@ -493,21 +484,8 @@ export class DataManager extends Events {
     }
   }
 
-  async getConfig() {
+  getConfig() {
     return this.db.data.config || {};
-  }
-
-  getConfigSynchronous() {
-    return this.db.data.config || {};
-  }
-
-  async updateConfigOLD(updatedConfig: Partial<Config>) {
-    this.db.data.config = {
-      ...this.db.data.config,
-      ...updatedConfig
-    };
-    await this.persist();
-    this.trigger('config-updated'); // Emit config-updated event
   }
 
   getProcessedFileRecords() {
@@ -573,30 +551,8 @@ export class DataManager extends Events {
     await this.persist();
   }
 
-  async startIntakeDirectoryPolling() {
-    if (!this.db.data.config.enableIntakeFolderPolling) return;
-
-    // consider intakeFolderPollingInterval as seconds (so convert to ms)
-    const interval = (this.db.data.config.intakeFolderPollingInterval || DefaultConfig.intakeFolderPollingInterval) * 1000;
-
-    if (interval < 30000) {
-      this.plugin.logger.warn('DataManager: Intake folder polling interval is less than 30 seconds. This is not recommended.');
-      return;
-    }
-
-    this.pollIntervalId = window.setInterval(
-      () => this.plugin.screenshotProcessor.processIntakeFolderAuto(),
-      interval
-    );
-  }
-
-  stopIntakeDirectoryPolling() {
-    if (this.pollIntervalId) {
-      window.clearInterval(this.pollIntervalId);
-      this.pollIntervalId = null;
-    }
-  }
-
+  /** Check for unprocessed images and trigger processing */
+  /** Keeping for posterity sake as the application needs change */
   private async checkForUnprocessedImages() {
     const periodicProcessingEnabled = await this.plugin.periodicProcessingEnabled();
     if (!periodicProcessingEnabled) return;
@@ -678,24 +634,24 @@ export class DataManager extends Events {
 
       // Check if screenshot file exists
       if (entry.screenshotStoragePath) {
-        const screenshotExists = await this.plugin.app.vault.adapter.exists(entry.screenshotStoragePath);
-        if (!screenshotExists) {
+        const screenshotExists = this.plugin.app.vault.getAbstractFileByPath(entry.screenshotStoragePath);
+        if (screenshotExists instanceof TFile) {
           shouldRemove = true;
         }
       }
 
       // Check if note file exists
       if (entry.notePath) {
-        const noteExists = await this.plugin.app.vault.adapter.exists(entry.notePath);
-        if (!noteExists) {
+        const noteExists = this.plugin.app.vault.getAbstractFileByPath(entry.notePath);
+        if (noteExists instanceof TFile) {
           shouldRemove = true;
         }
       }
 
       // Check if metadata file exists
       if (entry.metadataPath) {
-        const metadataExists = await this.plugin.app.vault.adapter.exists(entry.metadataPath);
-        if (!metadataExists) {
+        const metadataExists = this.plugin.app.vault.getAbstractFileByPath(entry.metadataPath);
+        if (metadataExists instanceof TFile) {
           shouldRemove = true;
         }
       }

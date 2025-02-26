@@ -8,6 +8,7 @@ import { MainViewHeader } from '@/components/MainViewHeader';
 import { ViewMetadataModal } from '../components/modals/ViewMetadataModal';
 import { openNoteWithTag } from '@/services/note-link-service';
 import { BaseViewProps, useBaseView } from './BaseView';
+import { DeleteConfirmationModal } from '@/components/modals/DeleteConfirmationModal';
 
 const ListView = (props: BaseViewProps) => {
   const {
@@ -102,7 +103,7 @@ const ListView = (props: BaseViewProps) => {
               {item.title}
             </span>
             <span>{DateTime.fromISO(item.timestamp).toFormat('yyyy/MM/dd HH:mm')}</span>
-            <span>{item.extractedTags ? item.extractedTags.join(', ') : 'No Tags'}</span>
+            <span>{item.extractedTags ? item.extractedTags.join(', ') : 'No tags'}</span>
             <span className='flex flex-row items-center gap-2'>
               <button
                 aria-label='View metadata'
@@ -137,14 +138,18 @@ const ListView = (props: BaseViewProps) => {
                 aria-label='Delete screenshot'
                 className='cursor-pointer'
                 onClick={async () => {
-                  const shouldDelete = window.confirm('Are you sure you want to delete this screenshot and its metadata?');
-                  if (shouldDelete) {
+                  const modal = new DeleteConfirmationModal(app, plugin, 'Are you sure you want to delete this screenshot and its metadata?', async () => {
                     await plugin.screenshotProcessor.deleteScreenshotMetadata({
                       identity: item.timestamp,
                       identityType: 'timestamp'
                     });
                     await refreshMetadata();
-                  }
+                  },
+                    () => {
+                      modal.close();
+                    }
+                  );
+                  modal.open();
                 }}>
                 <Trash2 className='w-4 h-4' />
               </button>

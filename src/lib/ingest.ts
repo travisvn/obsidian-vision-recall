@@ -1,4 +1,4 @@
-import { TFile, normalizePath, FileSystemAdapter } from 'obsidian';
+import { TFile, normalizePath, Vault } from 'obsidian';
 import { base64ToExtension } from './encode';
 import VisionRecallPlugin from '@/main';
 
@@ -18,21 +18,21 @@ export async function saveBase64ImageInVault(plugin: VisionRecallPlugin, base64:
     const buffer = Buffer.from(base64Data, 'base64');
 
     // Get the Obsidian filesystem
-    const adapter = plugin.app.vault.adapter;
-    if (!(adapter instanceof FileSystemAdapter)) {
+    const vault = plugin.app.vault;
+    if (!(vault instanceof Vault)) {
       plugin.logger.error("This Obsidian instance does not support file writing.");
       return null;
     }
 
     // Ensure the folder exists
-    const folderExists = await adapter.exists(folderPath);
+    const folderExists = vault.getFolderByPath(folderPath);
     if (!folderExists) {
       // await adapter.mkdir(folderPath);
       return null;
     }
 
     // Write the file
-    await adapter.writeBinary(filePath, buffer);
+    await vault.createBinary(filePath, buffer);
 
     // Return the saved file
     const file = plugin.app.vault.getAbstractFileByPath(filePath);

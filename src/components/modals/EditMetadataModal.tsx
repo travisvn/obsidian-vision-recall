@@ -28,7 +28,7 @@ const EditMetadataForm: React.FC<EditMetadataModalProps> = ({ metadata, onSave, 
   };
 
   return (
-    <div className="edit-metadata-modal">
+    <div className="vr vr-edit-metadata-modal">
 
       <form onSubmit={handleSubmit}>
         <div className="form-group">

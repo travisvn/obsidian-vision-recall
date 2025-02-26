@@ -8,8 +8,7 @@ interface DataContextType {
   addEntry: (entry: UserData) => Promise<void>;
   removeEntry: (id: string) => Promise<void>;
   refreshEntries: () => Promise<void>;
-  getConfig: () => Promise<Config>;
-  getConfigSynchronous: () => Config;
+  getConfig: () => Config;
   setConfig: (config: Config) => Promise<void>;
   getAvailableTags: () => Set<string>;
   setAvailableTags: (tags: Set<string>) => Promise<void>;
@@ -64,12 +63,8 @@ export const DataProvider: React.FC<{ dataManager: DataManager; children: React.
     await refreshEntries(); // Ensure immediate UI update
   };
 
-  const getConfig = async () => {
-    return await dataManager.getConfig();
-  };
-
-  const getConfigSynchronous = () => {
-    return dataManager.getConfigSynchronous();
+  const getConfig = () => {
+    return dataManager.getConfig();
   };
 
   const setConfig = async (config: Config) => {
@@ -100,7 +95,6 @@ export const DataProvider: React.FC<{ dataManager: DataManager; children: React.
         removeEntry,
         refreshEntries,
         getConfig,
-        getConfigSynchronous,
         setConfig,
         getAvailableTags,
         setAvailableTags,
