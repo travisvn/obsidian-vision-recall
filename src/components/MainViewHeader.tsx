@@ -129,8 +129,7 @@ export const MainViewHeader = ({ metadata, refreshMetadata, viewMode = 'list', o
             onClick={() => {
               new DocViewerModal(
                 app,
-                plugin,
-                'reference'
+                plugin
               ).open();
             }}
           >
