@@ -8,7 +8,17 @@ export default defineConfig(async ({ mode }) => {
   const prod = mode === "production";
 
   return {
-    plugins: [react()],
+    plugins: [
+      react(),
+      {
+        name: "markdown-loader",
+        transform(code, id) {
+          if (id.slice(-3) === ".md") {
+            return `export default ${JSON.stringify(code)};`;
+          }
+        },
+      },
+    ],
     resolve: {
       alias: {
         "@": path.resolve(__dirname, "./src")

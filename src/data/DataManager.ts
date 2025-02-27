@@ -443,9 +443,7 @@ export class DataManager extends Events {
           }
         }
 
-        this.plugin.app.vault.process(file, (data: string) => {
-          return dataStr;
-        });
+        this.plugin.app.vault.modify(file, dataStr);
         this.plugin.logger.info("modified existing file", file.path);
       }
     }

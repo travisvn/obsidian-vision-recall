@@ -1,4 +1,4 @@
-import { App, FileManager, Notice, TFile, TFolder, normalizePath } from 'obsidian';
+import { App, FileManager, Notice, TFile, TFolder, arrayBufferToBase64, normalizePath } from 'obsidian';
 import Tesseract, { createWorker, Worker } from 'tesseract.js';
 import { VisionRecallPluginSettings } from '@/types/settings-types';
 import { DEFAULT_TAGS_AND_TITLE, TagsAndTitle, VISION_LLM_PROMPT, callLLMAPI, llmSuggestTagsAndTitle } from '@/services/llm-service';
@@ -331,7 +331,7 @@ export class ScreenshotProcessor {
   private async performVisionAnalysis(imageFile: TFile, ocrText: string): Promise<string | null> {
     try {
       const imageBuffer = await this.app.vault.readBinary(imageFile);
-      const base64Image = base64EncodeImage(imageBuffer);
+      const base64Image = arrayBufferToBase64(imageBuffer);
 
       const visionPayload = {
         model: this.settings.visionModelName,

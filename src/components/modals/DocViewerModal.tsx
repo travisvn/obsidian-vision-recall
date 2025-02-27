@@ -2,6 +2,10 @@ import { App, MarkdownRenderer, Modal, requestUrl } from 'obsidian';
 import React, { useEffect, useRef, useState } from 'react';
 import { createRoot } from 'react-dom/client';
 import VisionRecallPlugin from '@/main';
+// import ollamaSetup from './ollama-setup.md';
+// import referenceGuide from './reference.md';
+import ollamaSetup from '@/docs/ollama-setup.md';
+import referenceGuide from '@/docs/reference.md';
 
 interface DocViewerFormProps {
   onClose: () => void;
@@ -10,8 +14,8 @@ interface DocViewerFormProps {
 }
 
 const DOC_LOCATIONS = {
-  'ollama-setup': 'https://raw.githubusercontent.com/travisvn/obsidian-vision-recall/main/docs/ollama-setup.md',
-  'reference-guide': 'https://raw.githubusercontent.com/travisvn/obsidian-vision-recall/main/docs/reference.md',
+  'ollama-setup': ollamaSetup,
+  'reference-guide': referenceGuide,
 }
 
 const DocViewerForm: React.FC<DocViewerFormProps> = ({ onClose, app, plugin }) => {
@@ -20,25 +24,26 @@ const DocViewerForm: React.FC<DocViewerFormProps> = ({ onClose, app, plugin }) =
   const [content, setContent] = useState<string>('');
   const [error, setError] = useState<string>('');
 
-  const fetchContent = async (url: string) => {
-    try {
-      // const response = await fetch(url);
-      const response = await requestUrl(url);
-      if (response.status !== 200) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-      const text = response.text;
-      return text;
-    } catch (error) {
-      console.error('Error fetching content:', error);
-      setError('Failed to fetch content');
-      return '';
-    }
-  }
+  // const fetchContent = async (url: string) => {
+  //   try {
+  //     // const response = await fetch(url);
+  //     const response = await requestUrl(url);
+  //     if (response.status !== 200) {
+  //       throw new Error(`HTTP error! status: ${response.status}`);
+  //     }
+  //     const text = response.text;
+  //     return text;
+  //   } catch (error) {
+  //     console.error('Error fetching content:', error);
+  //     setError('Failed to fetch content');
+  //     return '';
+  //   }
+  // }
 
   useEffect(() => {
     const fetchContentEffect = async () => {
-      const content = await fetchContent(DOC_LOCATIONS[selectedDoc]);
+      // const content = await fetchContent(DOC_LOCATIONS[selectedDoc]);
+      const content = DOC_LOCATIONS[selectedDoc];
       setContent(content);
     }
     fetchContentEffect();

@@ -97,9 +97,11 @@ export default class VisionRecallPlugin extends Plugin {
 			)
 		}
 
-		this.dataManager.on('unprocessed-images-found', async () => {
-			await this.screenshotProcessor.processIntakeFolderAuto();
-		});
+		this.registerEvent(
+			this.dataManager.on('unprocessed-images-found', async () => {
+				await this.screenshotProcessor.processIntakeFolderAuto();
+			})
+		)
 	}
 
 	private registerCommands() {
@@ -335,6 +337,6 @@ export default class VisionRecallPlugin extends Plugin {
 			}
 		}
 
-		return newFolderPath;
+		return normalizePath(newFolderPath);
 	}
 }
