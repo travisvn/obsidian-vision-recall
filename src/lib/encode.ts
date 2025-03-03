@@ -1,13 +1,3 @@
-export function base64EncodeImage(imageBuffer: ArrayBuffer): string {
-  let binary = '';
-  const bytes = new Uint8Array(imageBuffer);
-  const len = bytes.byteLength;
-  for (let i = 0; i < len; i++) {
-    binary += String.fromCharCode(bytes[i]);
-  }
-  return btoa(binary);
-}
-
 export const base64ToExtension = (base64: string): string | null => {
   // Match the MIME type from the base64 string
   const match = base64.match(/^data:image\/([a-zA-Z0-9+]+);base64,/);

@@ -6,8 +6,6 @@ import VisionRecallPlugin from '@/main';
 import { checkOCRText } from '@/lib/ocr-validation';
 import { formatTags, sanitizeObsidianTag, tagsToCommaString } from '@/lib/tag-utils';
 import { useQueueStore } from '@/stores/queueStore';
-import { PluginLogger } from '@/lib/Logger';
-import { base64EncodeImage } from '@/lib/encode';
 import { visionLLMResponseCategoriesMap } from '@/data/reference';
 import { computeFileHash, shouldProcessImage } from '@/lib/image-utils';
 import { sanitizeFilename } from './shared-functions';
