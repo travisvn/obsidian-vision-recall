@@ -44,6 +44,11 @@ const ConfigModalContent = ({
   return (
     <div className="vr config-modal-container">
       <form onSubmit={handleSubmit} className="config-modal-form">
+        <div className='flex flex-col items-center justify-center gap-2 mb-4'>
+          <span className='text-sm italic opacity-50 hover:opacity-100 duration-300 text-center'>
+            Most settings are in the Obsidian settings menu
+          </span>
+        </div>
 
         <div className="config-field">
           <label className="config-field-checkbox-label">

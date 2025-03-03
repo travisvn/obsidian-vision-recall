@@ -415,3 +415,8 @@
   height: auto;
   width: auto;
 }
+
+.vr-screenshot-modal {
+  --dialog-width: calc(min(auto, 100%));
+  --dialog-height: calc(min(auto, 100%));
+}

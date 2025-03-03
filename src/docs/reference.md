@@ -2,12 +2,14 @@
 
 This guide will help you obtain API keys from supported providers and configure them for use with the Screenshot AI Obsidian plugin.
 
+[Free Text & Image LLMs on OpenRouter](https://openrouter.ai/models?max_price=0&modality=text%2Bimage-%3Etext)
+
 ## 1. Choosing Your AI Models
 
 To process screenshots effectively, the plugin requires:
 
 - **A vision model**: Used to extract and analyze image content.
-- **A regular LLM model**: Used for text-based queries and reasoning. This model may also support vision (i.e., multimodal models like GPT-4 Turbo with Vision).
+- **A regular LLM model**: Used for text-based queries and reasoning. This model may also support vision (i.e., multimodal models like `gpt-4o`, `gpt-4o-mini`, etc.).
 
 You can use the same model for both tasks or specify separate models.
 
@@ -68,4 +70,4 @@ For troubleshooting, refer to the **Obsidian Console** (`Ctrl+Shift+I` on Window
 
 ---
 
-For further assistance, visit our [GitHub Issues](https://github.com/your-repo/issues) page or the plugin documentation.
+For further assistance, visit our [GitHub Discussions](https://github.com/travisvn/obsidian-vision-recall/discussions) page to post a question or view the plugin documentation.

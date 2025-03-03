@@ -112,13 +112,13 @@ function sanitizeTags(rawTags: any): string[] {
 }
 
 export const DEFAULT_TAGS_AND_TITLE = {
+  title: 'Untitled',
   tags: [],
-  title: 'Untitled'
 }
 
 export type TagsAndTitle = {
-  tags: string[];
   title: string;
+  tags: string[];
 }
 
 export async function llmSuggestTagsAndTitle(settings: VisionRecallPluginSettings, notesText: string | null): Promise<TagsAndTitle> {

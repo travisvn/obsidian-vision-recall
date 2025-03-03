@@ -77,7 +77,7 @@ const ViewContainer = ({ initialMetadata }) => {
   const [viewMode, setViewMode] = React.useState<'list' | 'gallery'>(() => {
     try {
       const saved = plugin.app.loadLocalStorage('vision-recall-view-mode');
-      return saved === 'gallery' ? 'gallery' : 'list';
+      return saved === 'list' ? 'list' : 'gallery';
     } catch {
       // return 'list';
       return 'gallery';

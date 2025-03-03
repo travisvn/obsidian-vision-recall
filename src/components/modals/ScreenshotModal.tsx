@@ -15,7 +15,8 @@ export class ScreenshotModal extends Modal {
   }
 
   onOpen() {
-    const { contentEl } = this;
+    const { contentEl, modalEl } = this;
+    modalEl.addClass('vr-screenshot-modal');
     this.setTitle('Screenshot preview');
 
     contentEl.addClass('screenshot-modal-content');

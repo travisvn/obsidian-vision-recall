@@ -222,7 +222,7 @@ export const MainViewHeader = ({ metadata, refreshMetadata, viewMode = 'list', o
         </div>
 
         <button
-          aria-label='Config'
+          aria-label='Advanced settings'
           className='cursor-pointer flex flex-row items-center gap-2'
           onClick={() => {
             new ConfigModal(app, plugin, plugin.dataManager).open();

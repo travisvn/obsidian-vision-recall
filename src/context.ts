@@ -2,9 +2,6 @@ import { App } from "obsidian";
 import * as React from "react";
 import VisionRecallPlugin from "@/main"; // Import your plugin class
 
-// App context
-export const AppContext = React.createContext<App | undefined>(undefined);
-
 // Event target context
 export const EventTargetContext = React.createContext<EventTarget | undefined>(undefined);
 

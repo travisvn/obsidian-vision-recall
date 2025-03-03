@@ -43,7 +43,8 @@ This guide will walk you through setting up Ollama on your computer and configur
 3. Under "LLM settings":
 
    - Set "LLM provider" to "Ollama"
-   - Set "API base URL" to: `http://localhost:11434`
+   - Set "API base URL" to: `http://localhost:11434/v1`
+     - _Don't forget the `/v1` at the end_
    - Set "Vision model name" to the name of the model you pulled (e.g., `llama3.2-vision:11b`)
    - Set "Endpoint LLM model name" to the same model name (e.g., `llama3.2-vision:11b`) or another one. Note that it may be beneficial to use the same model as the vision model due to system resource allocation.
 
