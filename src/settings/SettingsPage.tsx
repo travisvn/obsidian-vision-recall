@@ -14,6 +14,17 @@ export default class VisionRecallSettingTab extends PluginSettingTab {
 
     containerEl.empty();
 
+    const introContainer = containerEl.createEl('div', { cls: 'vision-recall-intro-section' });
+    introContainer.createEl('p', {
+      text: 'Transform screenshots into searchable Obsidian notes using AI vision and text analysis.',
+      cls: 'vision-recall-intro-message'
+    });
+
+    introContainer.createEl('p', {
+      text: 'Currently in Beta',
+      cls: 'vision-recall-intro-submessage'
+    });
+
     new Setting(containerEl).setName('LLM').setHeading();
 
     new Setting(containerEl)
@@ -322,5 +333,22 @@ export default class VisionRecallSettingTab extends PluginSettingTab {
           await this.plugin.saveSettings();
         })
       );
+
+
+    const starContainer = containerEl.createEl('div', { cls: 'vision-recall-star-section' });
+    starContainer.createEl('p', {
+      text: 'Please star this project on GitHub if you find it useful ⭐️',
+      cls: 'vision-recall-star-message'
+    });
+
+    starContainer.createEl('a', {
+      text: 'GitHub: Vision Recall Plugin',
+      href: 'https://github.com/travisvn/obsidian-vision-recall',
+      cls: 'external-link',
+      attr: {
+        target: '_blank',
+        rel: 'noopener'
+      }
+    });
   }
 }

@@ -420,3 +420,44 @@
   --dialog-width: calc(min(auto, 100%));
   --dialog-height: calc(min(auto, 100%));
 }
+
+.vision-recall-star-section {
+  padding-bottom: 10px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  margin-top: 2em;
+  padding: 10px;
+  border-radius: 5px;
+  background-color: var(--background-secondary);
+}
+
+.vision-recall-star-message {
+  font-size: x-large;
+  margin-bottom: 0.5em;
+  font-weight: 500;
+}
+
+.vision-recall-intro-section {
+  padding-bottom: 10px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.vision-recall-intro-message {
+  font-size: large;
+  margin-bottom: 0.5em;
+  font-weight: 500;
+  text-align: center;
+}
+
+.vision-recall-intro-submessage {
+  font-size: medium;
+  margin-bottom: 0.5em;
+  font-weight: 400;
+  text-align: center;
+  color: var(--text-muted);
+}
