@@ -1,6 +1,6 @@
 import { normalizePath, Notice, Plugin, TAbstractFile, TFile, WorkspaceLeaf } from 'obsidian';
 import MainView, { MAIN_VIEW_TYPE } from '@/views/MainView';
-import { PLUGIN_ICON, PLUGIN_NAME } from '@/constants';
+import { IMAGE_EXTENSIONS, PLUGIN_ICON, PLUGIN_NAME } from '@/constants';
 import ScreenshotKBSettingTab from '@/settings/SettingsPage';
 import { VisionRecallPluginSettings, DEFAULT_SETTINGS } from '@/types/settings-types';
 import { ScreenshotProcessor } from '@/services/screenshot-processor';
@@ -194,14 +194,38 @@ export default class VisionRecallPlugin extends Plugin {
 		return config.enablePeriodicIntakeFolderProcessing;
 	}
 
+	async getIntakeFromVaultFolderEnabled(): Promise<boolean> {
+		return this.settings.intakeFromVaultFolder;
+	}
+
+	async getLimitRootFolderIntakeToCSVStrings(): Promise<string[]> {
+		return this.settings.limitIntakeToCSV?.split(',').map(x => x.trim().toLowerCase()) || [];
+	}
+
 	async onFileCreated(file: TAbstractFile) {
 		const autoProcessingEnabled = await this.autoProcessingEnabled();
 		if (!autoProcessingEnabled) return;
 
 		if (!(file instanceof TFile)) return;
 
+		const ext = file.extension.toLowerCase();
+		if (!IMAGE_EXTENSIONS.includes(ext)) return;
+
 		const screenshotIntakeFolderPath = await this.getFolderFromSettingsKey('screenshotIntakeFolderPath');
-		if (!file.path.startsWith(screenshotIntakeFolderPath)) return;
+		if (!file.path.startsWith(screenshotIntakeFolderPath)) {
+
+			const intakeFromVaultFolderEnabled = await this.getIntakeFromVaultFolderEnabled();
+			if (intakeFromVaultFolderEnabled) {
+				const limitIntakeToCSV = await this.getLimitRootFolderIntakeToCSVStrings();
+				if (limitIntakeToCSV.length > 0) {
+					const filename = file.name.toLowerCase();
+					if (!limitIntakeToCSV.some(x => filename.includes(x))) return;
+				}
+			} else {
+				return;
+			}
+
+		}
 
 		if (await shouldProcessImage(this, file)) {
 			this.logger.info(`Processing new image: ${file.path}`);

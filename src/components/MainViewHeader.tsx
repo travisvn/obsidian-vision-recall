@@ -1,6 +1,6 @@
 import { useObsidianApp, usePlugin } from '@/context';
 import { FileUploadModal } from '@/components/modals/FileUploadModal';
-import { FolderSync, Info, LoaderPinwheel, Plus, RefreshCcw, Settings2, LayoutGrid, List, Bug, Maximize2, Hash, PencilRuler } from 'lucide-react';
+import { FolderSync, Info, LoaderPinwheel, Plus, RefreshCcw, Settings2, LayoutGrid, List, Bug, Maximize2, Hash, PencilRuler, FolderInput } from 'lucide-react';
 import { Notice } from 'obsidian';
 import React from 'react';
 import { DocViewerModal } from '@/components/modals/DocViewerModal';
@@ -105,6 +105,21 @@ export const MainViewHeader = ({ metadata, refreshMetadata, viewMode = 'list', o
               Process intake
             </div>
           </button>
+          {plugin.settings.intakeFromVaultFolder && (
+            <button
+              className='cursor-pointer flex flex-row items-center gap-2'
+              aria-label='Intake from the vault root folder'
+              onClick={async () => {
+                await plugin.screenshotProcessor.processVaultRootFolder();
+                await refreshMetadata();
+              }}
+            >
+              <FolderInput className='w-4 h-4' />
+              <div className='hidden @3xl/header:block'>
+                Intake from vault root
+              </div>
+            </button>
+          )}
           <button
             className='cursor-pointer flex flex-row items-center gap-2'
             aria-label='Refresh the screenshots'
@@ -114,9 +129,11 @@ export const MainViewHeader = ({ metadata, refreshMetadata, viewMode = 'list', o
             }}
           >
             <RefreshCcw className='w-4 h-4' />
-            <div className='hidden @3xl/header:block'>
-              Refresh
-            </div>
+            {!plugin.settings.intakeFromVaultFolder && (
+              <div className='hidden @3xl/header:block'>
+                Refresh
+              </div>
+            )}
           </button>
         </div>
       </div>

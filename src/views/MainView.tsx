@@ -46,7 +46,7 @@ export default class MainView extends ItemView {
     const metadata = this.plugin.dataManager.getAllEntries();
 
     // Create wrapper div for React
-    const reactContainer = container.createDiv({ cls: 'vision-recall-styling' });
+    const reactContainer = container.createDiv({ cls: 'vision-recall-styling vr' });
 
     // Create React root and render app
     this.root = createRoot(reactContainer);

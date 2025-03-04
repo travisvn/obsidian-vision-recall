@@ -10,6 +10,7 @@ import { visionLLMResponseCategoriesMap } from '@/data/reference';
 import { computeFileHash, shouldProcessImage } from '@/lib/image-utils';
 import { sanitizeFilename } from './shared-functions';
 import { generateTagsWithRetries } from './tag-service';
+import { IMAGE_EXTENSIONS } from '@/constants';
 
 export type DeleteScreenshotMetadataParams = {
   identity: string;
@@ -821,7 +822,7 @@ export class ScreenshotProcessor {
     const files = allFiles.filter(file => {
       const ext = file.extension.toLowerCase();
       return file.path.startsWith(normalizedIntakeDir) &&
-        ['png', 'jpg', 'jpeg', 'gif', 'webp', 'heic', 'heif', 'avif'].includes(ext);
+        IMAGE_EXTENSIONS.includes(ext);
     });
 
     if (files.length > 0) {
@@ -835,15 +836,69 @@ export class ScreenshotProcessor {
     }
   }
 
+  async processVaultRootFolder() {
+    if (!this.plugin.settings.intakeFromVaultFolder) {
+      this.plugin.logger.warn('Intake from vault folder is not enabled');
+      return;
+    }
+
+    const filenameMustInclude = await this.plugin.getLimitRootFolderIntakeToCSVStrings();
+    if (filenameMustInclude.length === 0) {
+      this.plugin.logger.warn('Must include terms as CSV in the settings to intake from vault root (example: screenshot,IMG)');
+      return;
+    }
+
+    const vaultFolder: TFolder = this.app.vault.getRoot();
+    if (!vaultFolder) {
+      this.plugin.logger.warn('Vault folder not configured');
+      return;
+    }
+
+    const allFiles = vaultFolder.children;
+
+    this.plugin.logger.debug(`Processing ${allFiles.length} files (or folders) in vault root`);
+
+    const files = allFiles.filter(file => {
+      if (!(file instanceof TFile)) return false;
+      const ext = file.extension.toLowerCase();
+      return IMAGE_EXTENSIONS.includes(ext) && filenameMustInclude.some(x => file.name.toLowerCase().includes(x));
+    });
+
+    let addedToQueue = 0;
+
+    if (files.length > 0) {
+      for (const file of files) {
+        if (file instanceof TFile) {
+          if (await shouldProcessImage(this.plugin, file)) {
+            this.plugin.processingQueue.addToQueue(file);
+            addedToQueue++;
+          }
+        }
+      }
+    }
+
+    if (addedToQueue > 0) {
+      this.plugin.logger.info(`Added ${addedToQueue} valid screenshots to the queue.`);
+      new Notice(`Added ${addedToQueue} valid screenshots to the queue.`);
+    } else {
+      this.plugin.logger.info('No valid screenshots found in root folder.');
+      new Notice('No valid screenshots found in root folder.');
+    }
+  }
+
   async processIntakeFolder() {
     let notice = new Notice("Running screenshot intake...", 0);
 
     const folderPath = await this.plugin.getFolderFromSettingsKey('screenshotIntakeFolderPath');
     const files = this.app.vault.getFolderByPath(folderPath);
+
+    let addedToQueue = 0;
+
     if (files instanceof TFolder) {
       for (const file of files.children) {
         if (file instanceof TFile) {
           this.plugin.processingQueue.addToQueue(file);
+          addedToQueue++;
         }
       }
     }
@@ -852,6 +907,10 @@ export class ScreenshotProcessor {
       notice.hide();
     }
 
-    new Notice('Screenshots have been added to the processing queue.');
+    if (addedToQueue > 0) {
+      new Notice(`${addedToQueue} screenshots have been added to the processing queue.`);
+    } else {
+      new Notice('No screenshots found in the intake folder.');
+    }
   }
 } 

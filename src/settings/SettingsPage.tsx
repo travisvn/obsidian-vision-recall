@@ -185,6 +185,30 @@ export default class VisionRecallSettingTab extends PluginSettingTab {
       );
 
 
+    new Setting(containerEl).setName('Special circumstances').setHeading();
+
+    new Setting(containerEl)
+      .setName('Intake from root vault folder')
+      .setDesc('Intake image files from the root vault folder, if the filename includes a term from the list below. \n\n(This is useful if adding images to your vault from Obsidian mobile app.)')
+      .addToggle(toggle => toggle
+        .setValue(this.plugin.settings.intakeFromVaultFolder)
+        .onChange(async (value) => {
+          this.plugin.settings.intakeFromVaultFolder = value;
+          await this.plugin.saveSettings();
+        })
+      );
+
+    new Setting(containerEl)
+      .setName('Limit intake to comma-separated list of terms')
+      .setDesc('Only image files with a filename that includes a term from the list will be processed. (Required for intake from root vault folder functionality.)')
+      .addText(text => text
+        .setPlaceholder('e.g., screenshot, IMG, etc.')
+        .setValue(this.plugin.settings.limitIntakeToCSV)
+        .onChange(async (value) => {
+          this.plugin.settings.limitIntakeToCSV = value;
+          await this.plugin.saveSettings();
+        })
+      );
 
     new Setting(containerEl).setName('Output note').setHeading();
 

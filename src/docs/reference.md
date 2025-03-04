@@ -47,18 +47,8 @@ In Obsidian:
 
 You need to define:
 
-- **Vision Model**: A model capable of processing images (e.g., `gpt-4-turbo`, `gpt-4-vision-preview`, `openrouter/llava`).
-- **LLM Model**: A text model for answering queries (e.g., `gpt-4-turbo`, `mistral`, `claude-3`).
-
-Example Configuration:
-
-```json
-{
-  "api_key": "your-api-key-here",
-  "vision_model": "gpt-4-vision-preview",
-  "llm_model": "gpt-4-turbo"
-}
-```
+- **Vision Model**: A model capable of processing images (e.g., `gpt-4o`, `gpt-4o-mini`, `openrouter/llava`).
+- **LLM Model**: A text model for answering queries (e.g., `gpt-4o`, `gpt-4o-mini`, `mistral`, `claude-3`).
 
 ## 4. Notes on API Usage & Limits
 

@@ -14,3 +14,5 @@ export const OPENROUTER_HEADERS = {
   'HTTP-Referer': 'https://visionrecall.com',
   'X-Title': 'Vision Recall'
 }
+
+export const IMAGE_EXTENSIONS = ['png', 'jpg', 'jpeg', 'gif', 'webp', 'heic', 'heif', 'avif'];
