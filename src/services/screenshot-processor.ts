@@ -1,7 +1,7 @@
 import { App, FileManager, Notice, TFile, TFolder, arrayBufferToBase64, normalizePath } from 'obsidian';
 import Tesseract, { createWorker, Worker } from 'tesseract.js';
 import { VisionRecallPluginSettings } from '@/types/settings-types';
-import { DEFAULT_TAGS_AND_TITLE, TagsAndTitle, VISION_LLM_PROMPT, callLLMAPI, llmSuggestTagsAndTitle } from '@/services/llm-service';
+import { DEFAULT_TAGS_AND_TITLE, TagsAndTitle, VISION_LLM_PROMPT, callLLMAPI } from '@/services/llm-service';
 import VisionRecallPlugin from '@/main';
 import { checkOCRText } from '@/lib/ocr-validation';
 import { formatTags, sanitizeObsidianTag, tagsToCommaString } from '@/lib/tag-utils';
@@ -9,6 +9,7 @@ import { useQueueStore } from '@/stores/queueStore';
 import { visionLLMResponseCategoriesMap } from '@/data/reference';
 import { computeFileHash, shouldProcessImage } from '@/lib/image-utils';
 import { sanitizeFilename } from './shared-functions';
+import { generateTagsWithRetries } from './tag-service';
 
 export type DeleteScreenshotMetadataParams = {
   identity: string;
@@ -404,7 +405,8 @@ export class ScreenshotProcessor {
   private async generateTags(generatedNotes: string): Promise<TagsAndTitle> {
     try {
       if (this.progressManager.isStoppedByUser()) return DEFAULT_TAGS_AND_TITLE;
-      const tagsAndTitle = await llmSuggestTagsAndTitle(this.settings, generatedNotes);
+      // const tagsAndTitle = await llmSuggestTagsAndTitle(this.settings, generatedNotes);
+      const tagsAndTitle = await generateTagsWithRetries(generatedNotes, this.settings);
       this.plugin.logger.debug('LLM suggested tags:', tagsAndTitle);
       return tagsAndTitle;
     } catch (error) {
