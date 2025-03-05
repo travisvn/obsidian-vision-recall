@@ -47,7 +47,18 @@ export const MainViewHeader = ({ metadata, refreshMetadata, viewMode = 'list', o
   return (
     <>
       <div className='@container/header flex flex-row justify-between items-center'>
-        <h2 className='m-0'>Vision Recall</h2>
+        <a
+          href={'https://github.com/travisvn/obsidian-vision-recall'}
+          target='_blank'
+          className='cursor-pointer text-text-normal no-underline'
+          style={{ textDecoration: 'none' }}
+          aria-label='Star this plugin on GitHub'
+        >
+          <h2
+            className='m-0 text-text-normal no-underline'
+            style={{ textDecoration: 'none' }}
+          >Vision Recall</h2>
+        </a>
 
         {onViewModeChange && (
           <div className="flex items-center gap-2">
@@ -105,21 +116,20 @@ export const MainViewHeader = ({ metadata, refreshMetadata, viewMode = 'list', o
               Process intake
             </div>
           </button>
-          {plugin.settings.intakeFromVaultFolder && (
-            <button
-              className='cursor-pointer flex flex-row items-center gap-2'
-              aria-label='Intake from the vault root folder'
-              onClick={async () => {
-                await plugin.screenshotProcessor.processVaultRootFolder();
-                await refreshMetadata();
-              }}
-            >
-              <FolderInput className='w-4 h-4' />
-              <div className='hidden @3xl/header:block'>
-                Intake from vault root
-              </div>
-            </button>
-          )}
+          <button
+            className='cursor-pointer flex flex-row items-center gap-2'
+            aria-label='Select images from a vault folder'
+            onClick={() => {
+              plugin.helperService.selectImages(app.vault.getRoot());
+            }}
+          >
+            <FolderInput className='w-4 h-4' />
+            <div className='hidden @4xl/header:block'>
+              Select images from vault
+            </div>
+          </button>
+
+
           <button
             className='cursor-pointer flex flex-row items-center gap-2'
             aria-label='Refresh the screenshots'
@@ -129,11 +139,9 @@ export const MainViewHeader = ({ metadata, refreshMetadata, viewMode = 'list', o
             }}
           >
             <RefreshCcw className='w-4 h-4' />
-            {!plugin.settings.intakeFromVaultFolder && (
-              <div className='hidden @3xl/header:block'>
-                Refresh
-              </div>
-            )}
+            <div className='hidden @4xl/header:block'>
+              Refresh
+            </div>
           </button>
         </div>
       </div>

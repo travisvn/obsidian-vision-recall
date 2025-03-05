@@ -6,6 +6,7 @@ import VisionRecallPlugin from '@/main';
 // import referenceGuide from './reference.md';
 import ollamaSetup from '@/docs/ollama-setup.md';
 import referenceGuide from '@/docs/reference.md';
+import { ExternalLink } from 'lucide-react';
 
 interface DocViewerFormProps {
   onClose: () => void;
@@ -81,6 +82,16 @@ const DocViewerForm: React.FC<DocViewerFormProps> = ({ onClose, app, plugin }) =
         >
           Reference guide
         </button>
+        <div className='flex flex-row gap-2 justify-center items-center'>
+          <a
+            href={'https://github.com/travisvn/obsidian-vision-recall/wiki'}
+            target='_blank'
+            className='cursor-pointer inline-flex flex-row items-center gap-2'
+            aria-label={'Open the wiki on GitHub for more information'}
+          >
+            Wiki <ExternalLink className='w-4 h-4' />
+          </a>
+        </div>
       </div>
       {error && <div className="error-message">{error}</div>}
       <div ref={containerRef} className="markdown-content" />

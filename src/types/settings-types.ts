@@ -16,9 +16,6 @@ export interface VisionRecallPluginSettings {
   screenshotIntakeFolderPath: string;
   outputNotesFolderPath: string;
 
-  intakeFromVaultFolder: boolean;
-  limitIntakeToCSV: string;
-
   maxTokens: number;
   truncateOcrText: number;
   truncateVisionLLMResponse: number;
@@ -53,9 +50,6 @@ export const DEFAULT_SETTINGS: VisionRecallPluginSettings = {
   screenshotStorageFolderPath: 'Screenshots',
   screenshotIntakeFolderPath: 'Intake',
   outputNotesFolderPath: 'Notes',
-
-  intakeFromVaultFolder: false,
-  limitIntakeToCSV: '',
 
   maxTokens: 500,
   truncateOcrText: 500,

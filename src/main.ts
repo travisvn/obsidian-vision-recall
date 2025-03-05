@@ -16,6 +16,7 @@ import { StatusBarManager } from './lib/StatusBarManager';
 import { debounce } from 'obsidian';
 import { customParse } from './lib/json-utils';
 import { DefaultConfig } from './types/config-types';
+import { HelperService } from './services/helper-service';
 
 export default class VisionRecallPlugin extends Plugin {
 	settings: VisionRecallPluginSettings;
@@ -24,6 +25,7 @@ export default class VisionRecallPlugin extends Plugin {
 	logger: PluginLogger;
 	processingQueue: ProcessingQueue;
 	statusBarManager: StatusBarManager;
+	helperService: HelperService;
 
 	metadata: any[] = [];
 	debouncedOnCreateHandler: (file: TAbstractFile) => void;
@@ -37,6 +39,7 @@ export default class VisionRecallPlugin extends Plugin {
 			this.screenshotProcessor = new ScreenshotProcessor(this.app, this.settings, this);
 			this.processingQueue = new ProcessingQueue(this, useQueueStore);
 			this.statusBarManager = new StatusBarManager(this);
+			this.helperService = new HelperService(this);
 
 			this.initializeUI();
 			await this.registerEventListeners();
@@ -194,14 +197,6 @@ export default class VisionRecallPlugin extends Plugin {
 		return config.enablePeriodicIntakeFolderProcessing;
 	}
 
-	async getIntakeFromVaultFolderEnabled(): Promise<boolean> {
-		return this.settings.intakeFromVaultFolder;
-	}
-
-	async getLimitRootFolderIntakeToCSVStrings(): Promise<string[]> {
-		return this.settings.limitIntakeToCSV?.split(',').map(x => x.trim().toLowerCase()) || [];
-	}
-
 	async onFileCreated(file: TAbstractFile) {
 		const autoProcessingEnabled = await this.autoProcessingEnabled();
 		if (!autoProcessingEnabled) return;
@@ -212,20 +207,7 @@ export default class VisionRecallPlugin extends Plugin {
 		if (!IMAGE_EXTENSIONS.includes(ext)) return;
 
 		const screenshotIntakeFolderPath = await this.getFolderFromSettingsKey('screenshotIntakeFolderPath');
-		if (!file.path.startsWith(screenshotIntakeFolderPath)) {
-
-			const intakeFromVaultFolderEnabled = await this.getIntakeFromVaultFolderEnabled();
-			if (intakeFromVaultFolderEnabled) {
-				const limitIntakeToCSV = await this.getLimitRootFolderIntakeToCSVStrings();
-				if (limitIntakeToCSV.length > 0) {
-					const filename = file.name.toLowerCase();
-					if (!limitIntakeToCSV.some(x => filename.includes(x))) return;
-				}
-			} else {
-				return;
-			}
-
-		}
+		if (!file.path.startsWith(screenshotIntakeFolderPath)) return;
 
 		if (await shouldProcessImage(this, file)) {
 			this.logger.info(`Processing new image: ${file.path}`);

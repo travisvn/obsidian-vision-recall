@@ -836,56 +836,6 @@ export class ScreenshotProcessor {
     }
   }
 
-  async processVaultRootFolder() {
-    if (!this.plugin.settings.intakeFromVaultFolder) {
-      this.plugin.logger.warn('Intake from vault folder is not enabled');
-      return;
-    }
-
-    const filenameMustInclude = await this.plugin.getLimitRootFolderIntakeToCSVStrings();
-    if (filenameMustInclude.length === 0) {
-      this.plugin.logger.warn('Must include terms as CSV in the settings to intake from vault root (example: screenshot,IMG)');
-      return;
-    }
-
-    const vaultFolder: TFolder = this.app.vault.getRoot();
-    if (!vaultFolder) {
-      this.plugin.logger.warn('Vault folder not configured');
-      return;
-    }
-
-    const allFiles = vaultFolder.children;
-
-    this.plugin.logger.debug(`Processing ${allFiles.length} files (or folders) in vault root`);
-
-    const files = allFiles.filter(file => {
-      if (!(file instanceof TFile)) return false;
-      const ext = file.extension.toLowerCase();
-      return IMAGE_EXTENSIONS.includes(ext) && filenameMustInclude.some(x => file.name.toLowerCase().includes(x));
-    });
-
-    let addedToQueue = 0;
-
-    if (files.length > 0) {
-      for (const file of files) {
-        if (file instanceof TFile) {
-          if (await shouldProcessImage(this.plugin, file)) {
-            this.plugin.processingQueue.addToQueue(file);
-            addedToQueue++;
-          }
-        }
-      }
-    }
-
-    if (addedToQueue > 0) {
-      this.plugin.logger.info(`Added ${addedToQueue} valid screenshots to the queue.`);
-      new Notice(`Added ${addedToQueue} valid screenshots to the queue.`);
-    } else {
-      this.plugin.logger.info('No valid screenshots found in root folder.');
-      new Notice('No valid screenshots found in root folder.');
-    }
-  }
-
   async processIntakeFolder() {
     let notice = new Notice("Running screenshot intake...", 0);
 
