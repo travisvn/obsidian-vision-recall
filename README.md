@@ -50,6 +50,8 @@
 
 ## Installation
 
+[Install Obsidian plugin](https://visionrecall.com/obsidian-plugin)
+
 1. Open Obsidian
 2. Go to **Settings** → **Community Plugins**
 3. Search for **Vision Recall**
@@ -74,3 +76,4 @@
 - **Managing Processing Queue:** Use the Processing Queue modal (accessible from the status bar button or commands) to monitor and control screenshot processing.
 
 ![Vision Recall Obsidian Plugin Demo](./demo.gif)
+
