@@ -80,11 +80,12 @@ const TagCombobox: React.FC<TagComboboxProps> = ({
         />
 
         <button
-          aria-label={`Make tags ${isInclusive ? "exclusive" : "inclusive"}`}
+          // aria-label={`Make tags ${isInclusive ? "exclusive" : "inclusive"}`}
+          aria-label={`Switch to ${isInclusive ? "ALL tags (exclusive)" : "ANY tag (inclusive)"}`}
           className="cursor-pointer"
           onClick={() => onInclusiveChange(!isInclusive)}
         >
-          {isInclusive ? "Inclusive" : "Exclusive"}
+          {isInclusive ? "ANY tag" : "ALL tags"}
         </button>
       </div>
 

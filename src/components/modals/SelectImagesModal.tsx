@@ -123,7 +123,7 @@ const SelectImagesForm: React.FC<SelectImagesModalProps> = ({ plugin, folder, on
                 className={cn('gallery-image cursor-pointer', {
                   'opacity-50': selectedImages.includes(image),
                 })}
-                aria-label={`Select screenshot: ${image.name}`}
+                aria-label={selectedImages.includes(image) ? `Deselect screenshot` : `Select screenshot`}
                 data-tooltip-position="top"
               />
 

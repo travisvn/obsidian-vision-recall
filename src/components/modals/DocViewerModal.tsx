@@ -6,6 +6,7 @@ import VisionRecallPlugin from '@/main';
 // import referenceGuide from './reference.md';
 import ollamaSetup from '@/docs/ollama-setup.md';
 import referenceGuide from '@/docs/reference.md';
+import lmStudio from '@/docs/lm-studio.md';
 import { ExternalLink } from 'lucide-react';
 
 interface DocViewerFormProps {
@@ -17,6 +18,7 @@ interface DocViewerFormProps {
 const DOC_LOCATIONS = {
   'ollama-setup': ollamaSetup,
   'reference-guide': referenceGuide,
+  'lm-studio': lmStudio,
 }
 
 const DocViewerForm: React.FC<DocViewerFormProps> = ({ onClose, app, plugin }) => {
@@ -77,6 +79,15 @@ const DocViewerForm: React.FC<DocViewerFormProps> = ({ onClose, app, plugin }) =
           type='button'
           className='cursor-pointer'
           onClick={async () => {
+            setSelectedDoc('lm-studio');
+          }}
+        >
+          LM Studio
+        </button>
+        <button
+          type='button'
+          className='cursor-pointer'
+          onClick={async () => {
             setSelectedDoc('reference-guide');
           }}
         >
@@ -94,7 +105,9 @@ const DocViewerForm: React.FC<DocViewerFormProps> = ({ onClose, app, plugin }) =
         </div>
       </div>
       {error && <div className="error-message">{error}</div>}
-      <div ref={containerRef} className="markdown-content" />
+      <div className="max-h-[calc(90vh-200px)] overflow-y-auto">
+        <div ref={containerRef} className="markdown-content" />
+      </div>
       <div className="button-group">
         <button type="button" onClick={onClose}>Close</button>
       </div>
@@ -111,7 +124,8 @@ export class DocViewerModal extends Modal {
   }
 
   onOpen() {
-    const { contentEl, titleEl } = this;
+    const { contentEl, titleEl, modalEl } = this;
+    modalEl.addClass('vr-doc-viewer-modal');
     titleEl.setText('Documentation');
     const root = createRoot(contentEl);
 

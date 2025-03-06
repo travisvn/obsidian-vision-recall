@@ -97,7 +97,7 @@ const ConfigModalContent = ({
         </div>
 
 
-        <div className="config-field">
+        {/* <div className="config-field">
           <label className="config-field-checkbox-label">
             <input
               type="checkbox"
@@ -106,7 +106,7 @@ const ConfigModalContent = ({
             />
             Default minimized progress display
           </label>
-        </div>
+        </div> */}
 
 
         <div className="config-modal-controls">
