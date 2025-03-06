@@ -3,7 +3,7 @@
 <p align="center">
 	<a href="https://github.com/travisvn/obsidian-vision-recall">
 		<img src="https://img.shields.io/github/stars/travisvn/obsidian-vision-recall?style=social" alt="GitHub stars"></a>
-	<a href="https://tts.travisvn.com/obsidian" target="_blank">
+	<a href="https://visionrecall.com/obsidian-plugin" target="_blank">
     <img src="https://img.shields.io/badge/dynamic/json?logo=obsidian&color=%23483699&label=downloads&query=%24%5B%27vision-recall%27%5D.downloads&url=https%3A%2F%2Fraw.githubusercontent.com%2Fobsidianmd%2Fobsidian-releases%2Fmaster%2Fcommunity-plugin-stats.json" alt="Obsidian downloads"></a>
 	<a href="https://github.com/travisvn/obsidian-vision-recall/releases">
 		<img src="https://img.shields.io/github/v/release/travisvn/obsidian-vision-recall" alt="GitHub release"></a>
