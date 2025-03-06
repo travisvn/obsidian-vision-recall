@@ -71,7 +71,7 @@ export const useQueueStore = create<QueueStore>((set, get) => ({
         total: state.status.total + files.length
       }
     })),
-    clearQueue: () => set({ status: DEFAULT_STATUS }),
+    clearQueue: () => set({ status: { ...DEFAULT_STATUS, queue: [] } }),
     setMessage: (message) => set((state) => ({
       status: { ...state.status, message }
     })),

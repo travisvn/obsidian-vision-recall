@@ -5,7 +5,8 @@ export const IS_DEV = process.env.NODE_ENV === 'development'
 export const STORAGE_KEYS = {
   ITEMS_PER_PAGE: 'vision-recall-items-per-page',
   SORT_CRITERIA: 'vision-recall-sort-criteria',
-  INITIALIZE_FOLDERS: 'vision-recall-initialize-folders'
+  INITIALIZE_FOLDERS: 'vision-recall-initialize-folders',
+  VIEW_MODE: 'vision-recall-view-mode'
 };
 
 export const DEFAULT_ITEMS_PER_PAGE = 12;

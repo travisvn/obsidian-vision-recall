@@ -7,9 +7,9 @@ import ListView from './ListView';
 import GalleryView from './GalleryView';
 import VisionRecallPlugin from '@/main';
 import { DataManager } from '@/data/DataManager';
-import { PLUGIN_ICON, PLUGIN_NAME } from '@/constants';
+import { PLUGIN_ICON, PLUGIN_NAME, STORAGE_KEYS } from '@/constants';
 import { StrictMode } from 'react';
-import { ProcessingDisplay } from '@/components/ProcessingDisplay';
+// import { ProcessingDisplay } from '@/components/ProcessingDisplay';
 
 export const MAIN_VIEW_TYPE = 'vision-recall-view';
 
@@ -76,7 +76,7 @@ const ViewContainer = ({ initialMetadata }) => {
 
   const [viewMode, setViewMode] = React.useState<'list' | 'gallery'>(() => {
     try {
-      const saved = plugin.app.loadLocalStorage('vision-recall-view-mode');
+      const saved = plugin.app.loadLocalStorage(STORAGE_KEYS.VIEW_MODE);
       return saved === 'list' ? 'list' : 'gallery';
     } catch {
       // return 'list';
@@ -87,7 +87,7 @@ const ViewContainer = ({ initialMetadata }) => {
   const handleViewModeChange = (mode: 'list' | 'gallery') => {
     setViewMode(mode);
     try {
-      plugin.app.saveLocalStorage('vision-recall-view-mode', mode);
+      plugin.app.saveLocalStorage(STORAGE_KEYS.VIEW_MODE, mode);
     } catch (e) {
       plugin.logger.error('Failed to save view mode preference:', e);
     }
