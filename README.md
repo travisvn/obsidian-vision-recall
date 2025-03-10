@@ -77,3 +77,8 @@
 
 ![Vision Recall Obsidian Plugin Demo](./demo.gif)
 
+### Troubleshooting
+
+Visit the [wiki](https://github.com/travisvn/obsidian-vision-recall/wiki)
+
+If you still need help, [join our new Discord](https://visionrecall.com/discord) or [post on the forum](https://forum.visionrecall.com)

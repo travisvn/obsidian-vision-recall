@@ -1,6 +1,6 @@
 import { useObsidianApp, usePlugin } from '@/context';
 import { FileUploadModal } from '@/components/modals/FileUploadModal';
-import { FolderSync, Info, LoaderPinwheel, Plus, RefreshCcw, Settings2, LayoutGrid, List, Bug, Maximize2, Hash, PencilRuler, FolderInput } from 'lucide-react';
+import { FolderSync, Info, LoaderPinwheel, Plus, RefreshCcw, Settings2, LayoutGrid, List, Bug, Maximize2, Hash, PencilRuler, FolderInput, HelpCircle } from 'lucide-react';
 import { Notice } from 'obsidian';
 import React from 'react';
 import { DocViewerModal } from '@/components/modals/DocViewerModal';
@@ -11,6 +11,7 @@ import { TestConfigModal } from './modals/TestConfigModal';
 import { ProcessingQueueModal } from './modals/ProcessingQueueModal';
 import { useQueueStore } from '@/stores/queueStore';
 import { DebugOperationsModal } from './modals/DebugOperationsModal';
+import { HelpModal } from './modals/HelpModal';
 
 interface MainViewHeaderProps {
   metadata: any[];
@@ -178,6 +179,22 @@ export const MainViewHeader = ({ metadata, refreshMetadata, viewMode = 'list', o
             <Bug className='w-4 h-4' />
             <div className='hidden @3xl/subheader:block'>
               Test config
+            </div>
+          </button>
+
+          <button
+            aria-label='Help'
+            className='cursor-pointer flex flex-row items-center gap-2'
+            onClick={() => {
+              new HelpModal(
+                app,
+                plugin
+              ).open();
+            }}
+          >
+            <HelpCircle className='w-4 h-4' />
+            <div className='hidden @3xl/subheader:block'>
+              Help
             </div>
           </button>
         </div>
