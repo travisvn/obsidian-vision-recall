@@ -44,3 +44,14 @@ export function sanitizeFilename(input: string): string {
   // Replace them with an empty string
   return normalizePath(input.replace(forbiddenChars, ''))
 }
+
+/**
+ * Sanitizes a string to be used as an Obsidian title
+ *    (may be redundant wrt above function)
+ * 
+ * @param title - The title to sanitize
+ * @returns The sanitized title
+ */
+export function sanitizeObsidianTitle(title: string): string {
+  return title.replace(/[\\/:]/g, '');
+}

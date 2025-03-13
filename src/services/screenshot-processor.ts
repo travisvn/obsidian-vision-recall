@@ -8,7 +8,7 @@ import { formatTags, sanitizeObsidianTag, tagsToCommaString } from '@/lib/tag-ut
 import { useQueueStore } from '@/stores/queueStore';
 import { visionLLMResponseCategoriesMap } from '@/data/reference';
 import { computeFileHash, shouldProcessImage } from '@/lib/image-utils';
-import { sanitizeFilename } from './shared-functions';
+import { sanitizeFilename, sanitizeObsidianTitle } from './shared-functions';
 import { generateTagsWithRetries } from './tag-service';
 import { IMAGE_EXTENSIONS } from '@/constants';
 
@@ -460,7 +460,7 @@ export class ScreenshotProcessor {
     try {
       const outputNotesFolder = normalizePath(await this.plugin.getFolderFromSettingsKey('outputNotesFolderPath'));
 
-      const noteTitleBase = tagsAndTitle.title || imageFile.basename;
+      const noteTitleBase = sanitizeObsidianTitle(tagsAndTitle.title || imageFile.basename);
       let noteTitle = `${noteTitleBase} Notes.md`;
       let notePath = normalizePath(`${outputNotesFolder}/${noteTitle}`);
 
