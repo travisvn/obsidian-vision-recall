@@ -7,7 +7,7 @@ import { DocViewerModal } from '@/components/modals/DocViewerModal';
 import { ConfigModal } from '@/components/modals/ConfigModal';
 import { cn } from '@/lib/utils';
 import { useDataContext } from '@/data/DataContext';
-import { TestConfigModal } from './modals/TestConfigModal';
+import { TestSetupModal } from './modals/TestSetupModal';
 import { ProcessingQueueModal } from './modals/ProcessingQueueModal';
 import { useQueueStore } from '@/stores/queueStore';
 import { DebugOperationsModal } from './modals/DebugOperationsModal';
@@ -166,10 +166,10 @@ export const MainViewHeader = ({ metadata, refreshMetadata, viewMode = 'list', o
           </button>
 
           <button
-            aria-label='Test config'
+            aria-label='Test setup'
             className='cursor-pointer flex flex-row items-center gap-2'
             onClick={() => {
-              new TestConfigModal(
+              new TestSetupModal(
                 app,
                 plugin,
                 dataManager
@@ -178,7 +178,7 @@ export const MainViewHeader = ({ metadata, refreshMetadata, viewMode = 'list', o
           >
             <Bug className='w-4 h-4' />
             <div className='hidden @3xl/subheader:block'>
-              Test config
+              Test setup
             </div>
           </button>
 
@@ -264,7 +264,7 @@ export const MainViewHeader = ({ metadata, refreshMetadata, viewMode = 'list', o
         </div>
 
         <button
-          aria-label='Advanced settings'
+          aria-label='Advanced configuration'
           className='cursor-pointer flex flex-row items-center gap-2'
           onClick={() => {
             new ConfigModal(app, plugin, plugin.dataManager).open();
@@ -272,7 +272,7 @@ export const MainViewHeader = ({ metadata, refreshMetadata, viewMode = 'list', o
         >
           <Settings2 className='w-4 h-4' />
           <div className='hidden @3xl/subheader:block'>
-            Settings
+            Config
           </div>
         </button>
       </div>

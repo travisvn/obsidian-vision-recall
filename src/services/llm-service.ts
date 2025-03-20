@@ -1,10 +1,29 @@
 import { OPENROUTER_HEADERS } from '@/constants';
 import { getLanguagePromptModifierIfIndicated } from '@/lib/languages';
 import { tagsJsonSchema, TagsSchema } from '@/lib/tag-utils';
+import { Config } from '@/types/config-types';
 import { VisionRecallPluginSettings } from '@/types/settings-types';
 import { requestUrl, RequestUrlParam, RequestUrlResponse } from 'obsidian';
 
 export const VISION_LLM_PROMPT = "Analyze this screenshot and describe its content and identify the type of screenshot if possible.";
+
+export const NOTES_LLM_PROMPT = "The following OCR text and vision analysis are from a screenshot. Summarize and synthesize the text and vision analysis and identify key information.";
+
+export const getVisionLLMPrompt = (config: Config) => {
+  if (config.visionLLMPrompt && config.visionLLMPrompt.trim() !== '') {
+    return config.visionLLMPrompt;
+  }
+
+  return VISION_LLM_PROMPT;
+}
+
+export const getNotesLLMPrompt = (config: Config) => {
+  if (config.notesLLMPrompt && config.notesLLMPrompt.trim() !== '') {
+    return config.notesLLMPrompt;
+  }
+
+  return NOTES_LLM_PROMPT;
+}
 
 export function adjustEndpoint(apiEndpointUrl: string, shouldRemove: boolean): string {
   const suffix = '/v1'

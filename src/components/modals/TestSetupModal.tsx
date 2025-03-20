@@ -6,13 +6,13 @@ import { DateTime } from 'luxon';
 import { DataManager } from '@/data/DataManager';
 import { getModels } from '@/services/llm-service';
 
-interface TestConfigModalProps {
+interface TestSetupModalProps {
   dataManager: DataManager;
   plugin: VisionRecallPlugin;
   onClose: () => void;
 }
 
-const TestConfigView: React.FC<TestConfigModalProps> = ({ dataManager, plugin, onClose }) => {
+const TestSetupView: React.FC<TestSetupModalProps> = ({ dataManager, plugin, onClose }) => {
   const settings = plugin.settings;
 
   const [models, setModels] = useState<string[]>([]);
@@ -127,7 +127,7 @@ const TestConfigView: React.FC<TestConfigModalProps> = ({ dataManager, plugin, o
   );
 };
 
-export class TestConfigModal extends Modal {
+export class TestSetupModal extends Modal {
   private metadata: any;
   private plugin: VisionRecallPlugin;
 
@@ -139,11 +139,11 @@ export class TestConfigModal extends Modal {
 
   onOpen() {
     const { contentEl, titleEl } = this;
-    titleEl.setText('Test config');
+    titleEl.setText('Test your setup');
     const root = createRoot(contentEl);
 
     root.render(
-      <TestConfigView
+      <TestSetupView
         dataManager={this.plugin.dataManager}
         plugin={this.plugin}
         onClose={() => this.close()}

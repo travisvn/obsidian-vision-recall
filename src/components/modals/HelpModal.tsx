@@ -41,18 +41,6 @@ const HelpView: React.FC<HelpModalProps> = ({ plugin, onClose }) => {
         >
           Join the new Discord server <ExternalLink className='w-3 h-3' />
         </a>
-
-        <div className='text-text-muted'>or</div>
-
-        <a
-          href='https://forum.visionrecall.com'
-          target='_blank'
-          rel='noopener noreferrer'
-          className='cursor-pointer inline-flex flex-row items-center gap-1'
-          aria-label={'Open the forum'}
-        >
-          Visit & chat on the forum <ExternalLink className='w-3 h-3' />
-        </a>
       </div>
 
       <div className="flex flex-row justify-end items-center w-full">

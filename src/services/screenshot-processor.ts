@@ -1,7 +1,7 @@
 import { App, FileManager, Notice, TFile, TFolder, arrayBufferToBase64, normalizePath } from 'obsidian';
 import Tesseract, { createWorker, Worker } from 'tesseract.js';
 import { VisionRecallPluginSettings } from '@/types/settings-types';
-import { DEFAULT_TAGS_AND_TITLE, TagsAndTitle, VISION_LLM_PROMPT, callLLMAPI } from '@/services/llm-service';
+import { DEFAULT_TAGS_AND_TITLE, TagsAndTitle, VISION_LLM_PROMPT, callLLMAPI, getNotesLLMPrompt, getVisionLLMPrompt } from '@/services/llm-service';
 import VisionRecallPlugin from '@/main';
 import { checkOCRText } from '@/lib/ocr-validation';
 import { formatTags, sanitizeObsidianTag, tagsToCommaString } from '@/lib/tag-utils';
@@ -171,7 +171,7 @@ export class ScreenshotProcessor {
     if (!ocrText || this.progressManager.isStoppedByUser()) return null;
 
     ocrText = cleanOCRResultLanguageSpecific(ocrText, currentLanguageSetting || 'eng') || '';
-    console.log('ocrText (after cleaning)', ocrText);
+    this.plugin.logger.debug('ocrText (after cleaning)', ocrText);
     if (!ocrText) return null;
 
     let validOCRText = await checkOCRText(ocrText, currentLanguageSetting || 'eng');
@@ -363,7 +363,7 @@ export class ScreenshotProcessor {
         languagePromptModifier = getLanguagePromptModifierIfIndicated(this.settings, true);
       }
 
-      let textPayload = VISION_LLM_PROMPT + languagePromptModifier;
+      let textPayload = getVisionLLMPrompt(this.plugin.dataManager.getConfig()) + languagePromptModifier;
       this.plugin.logger.debug('Vision LLM prompt:', textPayload);
 
       const visionPayload = {
@@ -399,18 +399,22 @@ export class ScreenshotProcessor {
 
   private async generateNotes(ocrText: string, visionLLMResponse: string, settings: VisionRecallPluginSettings): Promise<string | null> {
     try {
-
+      const config = this.plugin.dataManager.getConfig();
       const languagePromptModifier = getLanguagePromptModifierIfIndicated(settings, true);
 
-      let endpointPrompt = `The following text is from a screenshot. Summarize the text and identify key information.`;
+      let endpointPrompt = getNotesLLMPrompt(config);
 
-      const visionLLMCategories = Object.keys(visionLLMResponseCategoriesMap);
+      if (config.enableCategoryDetection) {
+        const visionLLMCategories = Object.keys(visionLLMResponseCategoriesMap);
 
-      const visionLLMCategory = visionLLMCategories.find(category => visionLLMResponse.toLowerCase().includes(category));
+        const visionLLMCategory = visionLLMCategories.find(category => visionLLMResponse.toLowerCase().includes(category));
 
-      if (visionLLMCategory) {
-        endpointPrompt = visionLLMResponseCategoriesMap[visionLLMCategory];
+        if (visionLLMCategory) {
+          endpointPrompt = visionLLMResponseCategoriesMap[visionLLMCategory];
+        }
       }
+
+      this.plugin.logger.debug('Generate Notes LLM prompt (without added language modifier, OCR text, or vision analysis that are added later):', endpointPrompt);
 
       endpointPrompt += `${languagePromptModifier}\n\nOCR text:\n${ocrText}\n\nVision analysis:\n${visionLLMResponse}`
 
@@ -430,8 +434,8 @@ export class ScreenshotProcessor {
       );
 
       this.plugin.logger.debug('Generated notes:', generatedNotes ? generatedNotes.substring(0, 300) + '...' : 'API call failed or no notes generated');
-      return generatedNotes;
 
+      return generatedNotes;
     } catch (error) {
       this.plugin.logger.error('Endpoint LLM API error:', error);
       new Notice('Endpoint LLM API call failed. See console for details.');
@@ -502,6 +506,7 @@ export class ScreenshotProcessor {
 
       let counter = 1;
       while (this.app.vault.getAbstractFileByPath(notePath) && counter < 100) {
+        this.plugin.logger.debug(`Note title already exists: ${noteTitle}. Incrementing counter and trying again.`);
         noteTitle = `${noteTitleBase} Notes (${counter}).md`;
         notePath = normalizePath(`${outputNotesFolder}/${noteTitle}`);
         counter++;
