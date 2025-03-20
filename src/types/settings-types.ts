@@ -7,6 +7,9 @@ export interface VisionRecallPluginSettings {
   visionModelName: string;
   endpointLlmModelName: string;
 
+  addLanguageConvertToPrompt: boolean;
+  tesseractLanguage: string;
+
   useParentFolder: boolean;
   parentFolderPath: string;
 
@@ -40,6 +43,9 @@ export const DEFAULT_SETTINGS: VisionRecallPluginSettings = {
   apiBaseUrl: '',
   visionModelName: 'gpt-4o-mini',
   endpointLlmModelName: 'gpt-4o-mini',
+
+  addLanguageConvertToPrompt: false,
+  tesseractLanguage: 'eng',
 
   useParentFolder: true,
   parentFolderPath: 'VisionRecall',

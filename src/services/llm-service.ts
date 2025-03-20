@@ -1,4 +1,5 @@
 import { OPENROUTER_HEADERS } from '@/constants';
+import { getLanguagePromptModifierIfIndicated } from '@/lib/languages';
 import { tagsJsonSchema, TagsSchema } from '@/lib/tag-utils';
 import { VisionRecallPluginSettings } from '@/types/settings-types';
 import { requestUrl, RequestUrlParam, RequestUrlResponse } from 'obsidian';
@@ -127,7 +128,8 @@ export async function llmSuggestTagsAndTitle(settings: VisionRecallPluginSetting
   }
 
   try {
-    const tagPrompt = `Please suggest exactly 5 relevant tags or keywords to categorize the following notes as well as a title for the notes. Return ONLY a JSON object with the following properties: tags (array of strings), title (string). Example format: { title: 'Title of the notes', tags: ['tag1', 'tag2', 'tag3', 'tag4', 'tag5'] }\n\nNotes:\n${notesText}`;
+    const languagePromptModifier = getLanguagePromptModifierIfIndicated(settings)
+    const tagPrompt = `Please suggest exactly 5 relevant tags or keywords to categorize the following notes as well as a title for the notes. Return ONLY a JSON object with the following properties: tags (array of strings), title (string). Example format: { title: 'Title of the notes', tags: ['tag1', 'tag2', 'tag3', 'tag4', 'tag5'] }${languagePromptModifier}\n\nNotes:\n${notesText}`;
 
     const tagPayload = {
       model: settings.endpointLlmModelName,

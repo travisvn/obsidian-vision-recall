@@ -2,6 +2,7 @@ import { z } from 'zod';
 import { zodToJsonSchema } from 'zod-to-json-schema';
 import { callLLMAPI } from '@/services/llm-service';
 import { VisionRecallPluginSettings } from '@/types/settings-types';
+import { getLanguagePromptModifierIfIndicated } from '@/lib/languages';
 
 // Define the Zod schema for tags and title
 export const TagsSchema = z.object({
@@ -120,10 +121,12 @@ export async function generateTagsWithRetries(
  */
 export async function generateTags(generatedNotes: string, settings: VisionRecallPluginSettings): Promise<TagsAndTitle> {
   try {
+    const languagePromptModifier = getLanguagePromptModifierIfIndicated(settings)
     const prompt = `
 Based on the following notes, suggest a concise title and relevant tags.
 The title should be brief but descriptive.
 The tags should be single words or short phrases that categorize the content.
+${languagePromptModifier}
 
 Notes:
 ${generatedNotes}

@@ -11,6 +11,7 @@ import { computeFileHash, shouldProcessImage } from '@/lib/image-utils';
 import { sanitizeFilename, sanitizeObsidianTitle } from './shared-functions';
 import { generateTagsWithRetries } from './tag-service';
 import { IMAGE_EXTENSIONS } from '@/constants';
+import { cleanOCRResultLanguageSpecific, getLanguagePromptModifierIfIndicated, getLanguageSetting } from '@/lib/languages';
 
 export type DeleteScreenshotMetadataParams = {
   identity: string;
@@ -78,17 +79,21 @@ class ProgressManager {
 export class ScreenshotProcessor {
   app: App;
   plugin: VisionRecallPlugin;
+  settings: VisionRecallPluginSettings;
+  tesseractLanguage: string | null;
   private worker: Worker | null = null;
   private progressManager: ProgressManager;
   // private logger: PluginLogger;
 
   constructor(
     app: App,
-    private settings: VisionRecallPluginSettings,
+    settings: VisionRecallPluginSettings,
     plugin: VisionRecallPlugin
   ) {
     this.app = app;
     this.plugin = plugin;
+    this.settings = settings;
+    this.tesseractLanguage = settings.addLanguageConvertToPrompt ? settings.tesseractLanguage : 'eng';
     // this.plugin.logger = plugin.logger;
     this.progressManager = new ProgressManager(plugin);
     // this.initializeWorker();
@@ -99,9 +104,11 @@ export class ScreenshotProcessor {
   }
 
   async initializeWorker() {
+    let currentTesseractLanguage = this.settings.addLanguageConvertToPrompt ? this.settings.tesseractLanguage : 'eng';
     try {
-      this.worker = await createWorker();
+      this.worker = await createWorker(currentTesseractLanguage);
       this.plugin.logger.debug('Tesseract worker initialized.');
+      this.tesseractLanguage = currentTesseractLanguage;
     } catch (error) {
       this.plugin.logger.error('Error initializing Tesseract worker:', error);
       new Notice('Failed to initialize OCR worker. See console for details.');
@@ -115,6 +122,11 @@ export class ScreenshotProcessor {
       this.worker = null;
       this.plugin.logger.debug('Tesseract worker terminated.');
     }
+  }
+
+  async reinitializeWorker() {
+    await this.terminateWorker();
+    await this.initializeWorker();
   }
 
   private async initializeProcessing(imageFile: TFile): Promise<boolean> {
@@ -149,26 +161,33 @@ export class ScreenshotProcessor {
     tagsAndTitle: TagsAndTitle;
     formattedTags: string;
   } | null> {
+    const currentLanguageSetting = getLanguageSetting(this.settings);
+    this.plugin.logger.debug('Current language setting:', currentLanguageSetting);
+
     this.progressManager.updateProgress('Performing OCR...', 10);
     if (this.progressManager.isStoppedByUser()) return null;
 
-    const ocrText = await this.performOCR(imageFile);
+    let ocrText = await this.performOCR(imageFile, currentLanguageSetting);
     if (!ocrText || this.progressManager.isStoppedByUser()) return null;
 
-    let validOCRText = await checkOCRText(ocrText);
+    ocrText = cleanOCRResultLanguageSpecific(ocrText, currentLanguageSetting || 'eng') || '';
+    console.log('ocrText (after cleaning)', ocrText);
+    if (!ocrText) return null;
+
+    let validOCRText = await checkOCRText(ocrText, currentLanguageSetting || 'eng');
     if (!validOCRText) validOCRText = '';
     if (this.progressManager.isStoppedByUser()) return null;
 
     this.progressManager.updateProgress('Analyzing image...', 30);
     if (this.progressManager.isStoppedByUser()) return null;
 
-    const visionLLMResponse = await this.performVisionAnalysis(imageFile, validOCRText);
+    const visionLLMResponse = await this.performVisionAnalysis(imageFile, validOCRText, this.settings.tesseractLanguage);
     if (!visionLLMResponse || this.progressManager.isStoppedByUser()) return null;
 
     this.progressManager.updateProgress('Generating notes...', 20);
     if (this.progressManager.isStoppedByUser()) return null;
 
-    const generatedNotes = await this.generateNotes(validOCRText, visionLLMResponse);
+    const generatedNotes = await this.generateNotes(validOCRText, visionLLMResponse, this.settings);
     if (!generatedNotes || this.progressManager.isStoppedByUser()) return null;
 
     this.progressManager.updateProgress('Generating tags...', 20);
@@ -253,7 +272,7 @@ export class ScreenshotProcessor {
       this.progressManager.updateProgress('Saving results...', 20);
       if (this.progressManager.isStoppedByUser()) return false;
 
-      const tagPath = sanitizeObsidianTag(paths.uniqueName);
+      const tagPath = sanitizeObsidianTag(paths.uniqueName, this.settings);
       const linkingTag = `#${this.settings.tagPrefix}/${tagPath}`;
 
       const noteInfo = await this.createObsidianNote(
@@ -305,11 +324,16 @@ export class ScreenshotProcessor {
     }
   }
 
-  private async performOCR(imageFile: TFile): Promise<string | null> {
+  private async performOCR(imageFile: TFile, language: string | null = null): Promise<string | null> {
     if (!this.worker) {
       this.plugin.logger.warn('Tesseract worker not initialized. OCR will not be performed.');
       new Notice('OCR worker is not ready.');
       return null;
+    }
+
+    if ((language != null && language != this.tesseractLanguage) || (language == null && this.tesseractLanguage != 'eng')) {
+      this.plugin.logger.warn('Tesseract language mismatch. Reinitializing Tesseract worker.');
+      await this.reinitializeWorker();
     }
 
     try {
@@ -328,10 +352,19 @@ export class ScreenshotProcessor {
     }
   }
 
-  private async performVisionAnalysis(imageFile: TFile, ocrText: string): Promise<string | null> {
+  private async performVisionAnalysis(imageFile: TFile, ocrText: string, language: string | null = null): Promise<string | null> {
     try {
       const imageBuffer = await this.app.vault.readBinary(imageFile);
       const base64Image = arrayBufferToBase64(imageBuffer);
+
+      let languagePromptModifier = '';
+      if (language) {
+        // languagePromptModifier = `\n\nThe response should be in ${language}.`;
+        languagePromptModifier = getLanguagePromptModifierIfIndicated(this.settings, true);
+      }
+
+      let textPayload = VISION_LLM_PROMPT + languagePromptModifier;
+      this.plugin.logger.debug('Vision LLM prompt:', textPayload);
 
       const visionPayload = {
         model: this.settings.visionModelName,
@@ -339,7 +372,7 @@ export class ScreenshotProcessor {
           {
             role: "user",
             content: [
-              { type: "text", text: VISION_LLM_PROMPT },
+              { type: "text", text: textPayload },
               { type: "image_url", image_url: { url: `data:image/png;base64,${base64Image}`, detail: "high" } },
             ],
           }
@@ -364,8 +397,11 @@ export class ScreenshotProcessor {
     }
   }
 
-  private async generateNotes(ocrText: string, visionLLMResponse: string): Promise<string | null> {
+  private async generateNotes(ocrText: string, visionLLMResponse: string, settings: VisionRecallPluginSettings): Promise<string | null> {
     try {
+
+      const languagePromptModifier = getLanguagePromptModifierIfIndicated(settings, true);
+
       let endpointPrompt = `The following text is from a screenshot. Summarize the text and identify key information.`;
 
       const visionLLMCategories = Object.keys(visionLLMResponseCategoriesMap);
@@ -376,7 +412,7 @@ export class ScreenshotProcessor {
         endpointPrompt = visionLLMResponseCategoriesMap[visionLLMCategory];
       }
 
-      endpointPrompt += `\n\nOCR text:\n${ocrText}\n\nVision analysis:\n${visionLLMResponse}`
+      endpointPrompt += `${languagePromptModifier}\n\nOCR text:\n${ocrText}\n\nVision analysis:\n${visionLLMResponse}`
 
       const endpointPayload = {
         model: this.settings.endpointLlmModelName,
@@ -476,6 +512,9 @@ export class ScreenshotProcessor {
         return null;
       }
 
+      const titleWithoutExtension = noteTitle.replace('.md', '').replace(/ /g, '_');
+      const uniqueTag = `#${this.settings.tagPrefix}/${titleWithoutExtension}`;
+
       // Truncate text if needed
       const truncatedOcrText = this.settings.truncateOcrText > 0
         ? ocrText.substring(0, this.settings.truncateOcrText)
@@ -496,7 +535,7 @@ export class ScreenshotProcessor {
       // Main note content
       const noteContent = `# Notes from screenshot: ${noteTitleBase}\n\n${generatedNotes}`;
 
-      const metadataContent = `\n\n---\n*Screenshot filename:* [[${newScreenshotPath}]]\n*${ocrTitle}*:\n\`\`\`\n${truncatedOcrText}...\n\`\`\`\n*${visionTitle}*:\n\`\`\`\n${truncatedVisionLLMResponse}...\n\`\`\`\n\n*Tags:* ${formattedTags}\n\n${linkingTag}\n`;
+      const metadataContent = `\n\n---\n*Screenshot filename:* [[${newScreenshotPath}]]\n*${ocrTitle}*:\n\`\`\`\n${truncatedOcrText}...\n\`\`\`\n*${visionTitle}*:\n\`\`\`\n${truncatedVisionLLMResponse}...\n\`\`\`\n\n*Tags:* ${formattedTags}\n\n${uniqueTag}\n`;
 
       const finalNoteContent = this.settings.includeMetadataInNote
         ? `${noteContent}\n\n${metadataContent}`

@@ -1,6 +1,6 @@
 {
   "name": "obsidian-vision-recall",
-  "version": "1.0.14",
+  "version": "1.1.0",
   "description": "Transform screenshots into searchable Obsidian notes using AI vision and text analysis.",
   "main": "main.js",
   "scripts": {

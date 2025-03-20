@@ -1,3 +1,4 @@
+import { getLanguagesForObsidianSettingsDropdown } from '@/lib/languages';
 import VisionRecallPlugin from '@/main';
 import { App, PluginSettingTab, Setting } from 'obsidian';
 
@@ -92,6 +93,38 @@ export default class VisionRecallSettingTab extends PluginSettingTab {
           await this.plugin.saveSettings();
         })
       );
+
+
+    new Setting(containerEl).setName('Language (experimental)').setHeading();
+
+    new Setting(containerEl)
+      .setName('Add language to prompt')
+      .setDesc('Add a line at the end of the prompt to generate the response in the selected language (experimental).')
+      .addToggle(toggle => toggle
+        .setValue(this.plugin.settings.addLanguageConvertToPrompt)
+        .onChange(async (value) => {
+          this.plugin.settings.addLanguageConvertToPrompt = value;
+          await this.plugin.saveSettings();
+          this.display();
+        })
+      );
+
+    const languageOptions = getLanguagesForObsidianSettingsDropdown();
+
+    if (this.plugin.settings.addLanguageConvertToPrompt) {
+      new Setting(containerEl)
+        .setName('Language for OCR and LLM processing')
+        .setDesc('Requested language to use for note generation and screenshot ingestion.')
+        .addDropdown(dropdown => dropdown
+          .addOptions(languageOptions)
+          .setValue(this.plugin.settings.tesseractLanguage)
+          .onChange(async (value: string) => {
+            this.plugin.settings.tesseractLanguage = value;
+            await this.plugin.saveSettings();
+            this.display();
+          })
+        );
+    }
 
     new Setting(containerEl).setName('Storage').setHeading();
 

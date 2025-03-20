@@ -1,5 +1,7 @@
 import { z } from 'zod';
 import { zodToJsonSchema } from 'zod-to-json-schema';
+import { cleanOCRResultLanguageSpecific, getLanguageSetting } from './languages';
+import { VisionRecallPluginSettings } from '@/types/settings-types';
 // Define the Zod schema
 export const TagsSchema = z.object({
   title: z.string(),
@@ -39,7 +41,7 @@ export function tagsFromCommaString(tags: string): string[] {
   return tags.split(',').map(tag => tag.trim());
 }
 
-export function sanitizeObsidianTag(tag: string): string | null {
+export function sanitizeObsidianTagOLD(tag: string): string | null {
   // Replace spaces with underscores to maintain readability
   tag = tag.replace(/\s+/g, '_');
 
@@ -53,5 +55,26 @@ export function sanitizeObsidianTag(tag: string): string | null {
 
   // Convert to lowercase to ensure case insensitivity
   // return tag.toLowerCase();
+  return tag;
+}
+
+export function sanitizeObsidianTag(tag: string, settings: VisionRecallPluginSettings): string | null {
+  // Replace spaces with underscores to maintain readability
+  tag = tag.replace(/\s+/g, '_');
+
+  const language = getLanguageSetting(settings);
+
+  if (language) {
+    tag = cleanOCRResultLanguageSpecific(tag, language);
+  } else {
+    // Remove all disallowed characters (keep letters, numbers, _, -, /)
+    tag = tag.replace(/[^a-zA-Z0-9_\/-]/g, '');
+
+    // Ensure there's at least one non-numeric character
+    if (!/[a-zA-Z_\/-]/.test(tag)) {
+      return null; // Return null if there's no valid non-numeric character
+    }
+  }
+
   return tag;
 }
