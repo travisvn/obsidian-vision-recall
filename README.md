@@ -81,4 +81,4 @@
 
 Visit the [wiki](https://github.com/travisvn/obsidian-vision-recall/wiki)
 
-If you still need help, [join our new Discord](https://visionrecall.com/discord) or [post on the forum](https://forum.visionrecall.com)
+If you still need help, [join our new Discord](https://visionrecall.com/discord)
