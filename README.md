@@ -11,6 +11,9 @@
 	  <img src="https://img.shields.io/github/issues/travisvn/obsidian-vision-recall" alt="GitHub issues"></a>
 	<img src="https://img.shields.io/github/last-commit/travisvn/obsidian-vision-recall?color=red" alt="GitHub last commit">
 	<img src="https://hits.seeyoufarm.com/api/count/incr/badge.svg?url=https%3A%2F%2Fgithub.com%2Ftravisvn%2Fobsidian-vision-recall&count_bg=%2379C83D&title_bg=%23555555&icon=&icon_color=%23E7E7E7&title=hits&edge_flat=false" alt="Hits">
+  <a href="https://visionrecall.com/discord">
+    <img src="https://img.shields.io/badge/Discord-Vision_Recall-blue?logo=discord&logoColor=white" alt="Discord">
+  </a>
 </p>
 
 <h1 align="center">Screenshot anything you want to recall later. Let AI handle the rest.</h1>
